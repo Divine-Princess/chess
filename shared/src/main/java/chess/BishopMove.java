@@ -13,6 +13,7 @@ public class BishopMove {
             int movCol = vector.get(1);
             int nextRow = currRow + movRow;
             int nextCol = currCol + movCol;
+
             while (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
                 ChessPosition nextPosition = new ChessPosition(nextRow, nextCol);
                 ChessPiece otherPiece = board.getPiece(nextPosition);

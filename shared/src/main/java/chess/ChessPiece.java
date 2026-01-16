@@ -73,7 +73,7 @@ public class ChessPiece {
             case QUEEN:
                 break;
             case KING:
-                KingMove.getKingMoves(possibleMoves, board, myPosition, piece, myColor, currRow, currCol);
+                KingMove.getKingMoves(possibleMoves, board, myColor, currRow, currCol);
         }
         return possibleMoves;
     }
