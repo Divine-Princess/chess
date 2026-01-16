@@ -67,7 +67,7 @@ public class ChessPiece {
             case BISHOP:
                 BishopMove.getBishopMoves(possibleMoves, board, myColor, currRow, currCol);
             case KNIGHT:
-                break;
+                KnightMove.getKnightMoves(possibleMoves, board, myColor, currRow, currCol);
             case ROOK:
                 break;
             case QUEEN:
