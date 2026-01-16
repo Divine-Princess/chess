@@ -12,6 +12,8 @@ public class BishopMove {
 
     public static Collection<ChessMove> getBishopMoves(ChessBoard board, ChessPosition myPosition) {
         List<ChessMove> possibleMoves = new ArrayList<ChessMove>();
+        ChessPiece piece = board.getPiece(myPosition);
+        ChessGame.TeamColor myColor = piece.getTeamColor();
         int currRow = myPosition.getRow();
         int currCol = myPosition.getColumn();
 
@@ -23,7 +25,21 @@ public class BishopMove {
             int nextRow = currRow + movRow;
             int nextCol = currCol + movCol;
             while (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
-                possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), null));
+                ChessPosition nextPosition = new ChessPosition(nextRow, nextCol);
+                ChessPiece otherPiece = board.getPiece(nextPosition);
+                System.out.println(otherPiece);
+
+                if (otherPiece == null) {
+                    possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), null));
+                }
+                else {
+                    ChessGame.TeamColor otherPieceColor = otherPiece.getTeamColor();
+                    if (!myColor.equals(otherPieceColor)) {
+                        System.out.println("ATTACK!");
+                        break;
+                    }
+
+                }
                 nextRow += movRow;
                 nextCol += movCol;
             }
