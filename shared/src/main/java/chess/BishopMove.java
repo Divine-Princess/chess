@@ -6,17 +6,23 @@ import java.util.List;
 
 public class BishopMove {
 
-    public BishopMove() {
-
-    }
-
     public static Collection<ChessMove> getBishopMoves(ChessBoard board, ChessPosition myPosition) {
-        List<ChessMove> possibleMoves = new ArrayList<ChessMove>();
+        List<ChessMove> possibleMoves = new ArrayList<>();
         ChessPiece piece = board.getPiece(myPosition);
         ChessGame.TeamColor myColor = piece.getTeamColor();
         int currRow = myPosition.getRow();
         int currCol = myPosition.getColumn();
 
+        getLegalMoves(board, myColor, possibleMoves, currRow, currCol);
+
+        return possibleMoves;
+    }
+
+    private static void addMove(List<ChessMove> possibleMoves, int currRow, int currCol, int nextRow, int nextCol) {
+        possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), null));
+    }
+
+    private static void getLegalMoves(ChessBoard board, ChessGame.TeamColor myColor, List<ChessMove> possibleMoves, int currRow, int currCol) {
         List<List<Integer>> vectors = List.of(List.of(1,1), List.of(1,-1), List.of(-1,1), List.of(-1,-1));
 
         for (List<Integer> vector : vectors) {
@@ -27,26 +33,22 @@ public class BishopMove {
             while (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
                 ChessPosition nextPosition = new ChessPosition(nextRow, nextCol);
                 ChessPiece otherPiece = board.getPiece(nextPosition);
-                System.out.println(otherPiece);
 
                 if (otherPiece == null) {
-                    possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), null));
+                    addMove(possibleMoves, currRow, currCol, nextRow, nextCol);
                 }
                 else {
                     ChessGame.TeamColor otherPieceColor = otherPiece.getTeamColor();
                     if (!myColor.equals(otherPieceColor)) {
-                        System.out.println("ATTACK!");
-                        break;
+                        addMove(possibleMoves, currRow, currCol, nextRow, nextCol);
                     }
+                    break;
 
                 }
                 nextRow += movRow;
                 nextCol += movCol;
             }
         }
-        return possibleMoves;
-        // return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
     }
-
 
 }
