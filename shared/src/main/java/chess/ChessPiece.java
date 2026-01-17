@@ -55,27 +55,8 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        ChessGame.TeamColor myColor = piece.getTeamColor();
-        int currRow = myPosition.getRow();
-        int currCol = myPosition.getColumn();
-        List<ChessMove> possibleMoves = new ArrayList<>();
-
-        switch (piece.getPieceType()) {
-            case PAWN:
-                break;
-            case BISHOP:
-                BishopMove.getBishopMoves(possibleMoves, board, myColor, currRow, currCol);
-            case KNIGHT:
-                KnightMove.getKnightMoves(possibleMoves, board, myColor, currRow, currCol);
-            case ROOK:
-                break;
-            case QUEEN:
-                break;
-            case KING:
-                KingMove.getKingMoves(possibleMoves, board, myColor, currRow, currCol);
-        }
-        return possibleMoves;
+        PieceMoveCalculator calc = new PieceMoveCalculator();
+        return calc.getPieceMoves(board, myPosition);
     }
 
     @Override
