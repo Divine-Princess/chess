@@ -43,22 +43,27 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        new ChessBoard();
+        List<ChessGame.TeamColor> colors = List.of(ChessGame.TeamColor.BLACK, ChessGame.TeamColor.WHITE);
+        List<Integer> rows = List.of(8,1);
 
-        ChessPiece rookBlack = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
-        List<ChessPosition> rookBlackPositions = List.of(new ChessPosition(8,1), new ChessPosition(8,8));
-        resetMultiplePieces(rookBlackPositions, rookBlack);
+        for (int i = 0; i < 2; i++) {
 
-        ChessPiece knightBlack = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
-        List<ChessPosition> knightBlackPositions = List.of(new ChessPosition(8,2), new ChessPosition(8,7));
-        resetMultiplePieces(knightBlackPositions, knightBlack);
+            ChessPiece rook = new ChessPiece(colors.get(i), ChessPiece.PieceType.ROOK);
+            List<ChessPosition> rookPositions = List.of(new ChessPosition(rows.get(i), 1), new ChessPosition(rows.get(i), 8));
+            resetMultiplePieces(rookPositions, rook);
 
-        ChessPiece bishopBlack = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
-        List<ChessPosition> bishopBlackPositions = List.of(new ChessPosition(8,3), new ChessPosition(8,6));
-        resetMultiplePieces(bishopBlackPositions, bishopBlack);
+            ChessPiece knight = new ChessPiece(colors.get(i), ChessPiece.PieceType.KNIGHT);
+            List<ChessPosition> knightPositions = List.of(new ChessPosition(rows.get(i), 2), new ChessPosition(rows.get(i), 7));
+            resetMultiplePieces(knightPositions, knight);
 
-        addPiece(new ChessPosition(8,4), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
-        addPiece(new ChessPosition(8,5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+            ChessPiece bishopBlack = new ChessPiece(colors.get(i), ChessPiece.PieceType.BISHOP);
+            List<ChessPosition> bishopBlackPositions = List.of(new ChessPosition(rows.get(i), 3), new ChessPosition(rows.get(i), 6));
+            resetMultiplePieces(bishopBlackPositions, bishopBlack);
+
+            addPiece(new ChessPosition(rows.get(i), 4), new ChessPiece(colors.get(i), ChessPiece.PieceType.QUEEN));
+            addPiece(new ChessPosition(rows.get(i), 5), new ChessPiece(colors.get(i), ChessPiece.PieceType.KING));
+
+        }
 
         ChessPiece pawnBlack = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         List<ChessPosition> pawnBlackPositions = new ArrayList<>();
@@ -66,21 +71,6 @@ public class ChessBoard {
             pawnBlackPositions.add(new ChessPosition(7,i));
         }
         resetMultiplePieces(pawnBlackPositions,pawnBlack);
-
-        ChessPiece rookWhite = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-        List<ChessPosition> rookWhitePositions = List.of(new ChessPosition(1,1), new ChessPosition(1,8));
-        resetMultiplePieces(rookWhitePositions, rookWhite);
-
-        ChessPiece knightWhite = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
-        List<ChessPosition> knightWhitePositions = List.of(new ChessPosition(1,2), new ChessPosition(1,7));
-        resetMultiplePieces(knightWhitePositions, knightWhite);
-
-        ChessPiece bishopWhite = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
-        List<ChessPosition> bishopWhitePositions = List.of(new ChessPosition(1,3), new ChessPosition(1,6));
-        resetMultiplePieces(bishopWhitePositions, bishopWhite);
-
-        addPiece(new ChessPosition(1,4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
-        addPiece(new ChessPosition(1,5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
 
         ChessPiece pawnWhite = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         List<ChessPosition> pawnWhitePositions = new ArrayList<>();
