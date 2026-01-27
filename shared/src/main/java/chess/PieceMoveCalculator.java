@@ -6,27 +6,30 @@ import java.util.List;
 
 public class PieceMoveCalculator {
 
-    private List<ChessMove> possibleMoves;
-    private ChessGame.TeamColor myColor;
+    private List<ChessMove> possibleMoves = new ArrayList<>();
     private ChessBoard board;
+    private ChessGame.TeamColor myColor;
+    private ChessPosition myPosition;
 
     private int currRow;
     private int currCol;
-    private int movRow = 0;
-    private int movCol = 0;
+    private int movRow;
+    private int movCol;
     private int nextRow;
     private int nextCol;
 
     private ChessPiece otherPiece;
     private ChessGame.TeamColor otherPieceColor;
+    private ChessPosition nextPosition;
+
 
     public Collection<ChessMove> getPieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        possibleMoves = new ArrayList<>();
+        this.board = board;
+        this.myPosition = myPosition;
         myColor = piece.getTeamColor();
         currRow = myPosition.getRow();
         currCol = myPosition.getColumn();
-        this.board = board;
 
         switch (piece.getPieceType()) {
             case PAWN:
@@ -35,35 +38,61 @@ public class PieceMoveCalculator {
             case BISHOP:
                 getBishopMoves();
                 break;
-            case KNIGHT:
-                getKnightMoves();
-                break;
             case ROOK:
                 getRookMoves();
                 break;
             case QUEEN:
-                getQueenMoves();
+                getRookMoves();
+                getBishopMoves();
                 break;
             case KING:
                 getKingMoves();
                 break;
+            case KNIGHT:
+                getKnightMoves();
+                break;
         }
-
         return possibleMoves;
     }
 
     private void addMove() {
-        possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), null));
+        possibleMoves.add(new ChessMove(myPosition, nextPosition, null));
+    }
+
+    private void getNextPosition() {
+        nextRow = currRow + movRow;
+        nextCol = currCol + movCol;
     }
 
     private void getOtherPiece() {
-        ChessPosition nextPosition = new ChessPosition(nextRow, nextCol);
+        nextPosition = new ChessPosition(nextRow,nextCol);
         otherPiece = board.getPiece(nextPosition);
     }
 
-    private void setNextPosition() {
-        nextRow = currRow + movRow;
-        nextCol = currCol + movCol;
+    private void getLongSlidingMoves(List<List<Integer>> vectors) {
+        for (List<Integer> vector : vectors) {
+            movRow = vector.getFirst();
+            movCol = vector.get(1);
+            getNextPosition();
+
+            while (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
+                getOtherPiece();
+
+                if (otherPiece == null) {
+                    addMove();
+                } else {
+                    otherPieceColor = otherPiece.getTeamColor();
+                    if (!(myColor == otherPieceColor)) {
+                        addMove();
+                    }
+                    break;
+
+                }
+                nextRow += movRow;
+                nextCol += movCol;
+            }
+
+        }
     }
 
     private void getPawnMoves() {
@@ -76,47 +105,42 @@ public class PieceMoveCalculator {
     }
 
     private void getWhitePawnMoves() {
-        // currRow must be 2 in order to move 2, row++
         List<List<Integer>> moves;
         List<List<Integer>> attackMoves = List.of(List.of(1,-1), List.of(1,1));
         if (currRow == 2) {
-            moves = List.of(List.of(1, 0), List.of(2, 0));
+            moves = List.of(List.of(1,0), List.of(2,0));
         } else {
-            moves = List.of(List.of(1, 0));
+            moves = List.of(List.of(1,0));
         }
-        getShortSlideMoves(moves);
-        getShortSlideMoves(attackMoves);
+        getPawnMovesCalc(attackMoves);
+        getPawnMovesCalc(moves);
     }
 
     private void getBlackPawnMoves() {
-        // currRow must be 7 in order to move 2, col--
         List<List<Integer>> moves;
-        List<List<Integer>> attackMoves = List.of(List.of(-1,1), List.of(-1,-1));
+        List<List<Integer>> attackMoves = List.of(List.of(-1,-1), List.of(-1,1));
         if (currRow == 7) {
-            moves = List.of(List.of(-1, 0), List.of(-2, 0));
+            moves = List.of(List.of(-1,0), List.of(-2,0));
         } else {
-            moves = List.of(List.of(-1, 0));
+            moves = List.of(List.of(-1,0));
         }
-        getShortSlideMoves(moves);
-        getShortSlideMoves(attackMoves);
+        getPawnMovesCalc(attackMoves);
+        getPawnMovesCalc(moves);
     }
 
-    private void getShortSlideMoves(List<List<Integer>> moves) {
+    private void getPawnMovesCalc(List<List<Integer>> moves) {
         for (List<Integer> move : moves) {
             movRow = move.getFirst();
             movCol = move.get(1);
-            setNextPosition();
-            System.out.println(nextRow + " " + nextCol);
+            getNextPosition();
 
-            // check if pawn can move forward
             if (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
                 getOtherPiece();
                 if (movCol == 0) {
                     if (otherPiece == null) {
-                        if (nextRow == 1 || nextRow == 8) {
+                        if (nextRow == 8 || nextRow == 1) {
                             promotePawn();
-                        }
-                        else {
+                        } else {
                             addMove();
                         }
                     } else {
@@ -125,86 +149,57 @@ public class PieceMoveCalculator {
                 } else {
                     if (otherPiece != null) {
                         otherPieceColor = otherPiece.getTeamColor();
-                        if (!myColor.equals(otherPieceColor)) {
-                            if (nextRow == 1 || nextRow == 8) {
+                        if (!(myColor == otherPieceColor)) {
+                            if (nextRow == 8 || nextRow == 1) {
                                 promotePawn();
-                            }
-                            else {
+                            } else {
                                 addMove();
                             }
                         }
                     }
                 }
+            } else {
+                break;
             }
         }
     }
 
     private void promotePawn() {
-        possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), ChessPiece.PieceType.QUEEN));
-        possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), ChessPiece.PieceType.KNIGHT));
-        possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), ChessPiece.PieceType.BISHOP));
-        possibleMoves.add(new ChessMove(new ChessPosition(currRow, currCol), new ChessPosition(nextRow, nextCol), ChessPiece.PieceType.ROOK));
+        possibleMoves.add(new ChessMove(myPosition, nextPosition, ChessPiece.PieceType.QUEEN));
+        possibleMoves.add(new ChessMove(myPosition, nextPosition, ChessPiece.PieceType.KNIGHT));
+        possibleMoves.add(new ChessMove(myPosition, nextPosition, ChessPiece.PieceType.BISHOP));
+        possibleMoves.add(new ChessMove(myPosition, nextPosition, ChessPiece.PieceType.ROOK));
     }
+
 
     private void getBishopMoves() {
+        List<List<Integer>> vectors = List.of(List.of(-1,-1), List.of(1,1), List.of(1,-1), List.of(-1,1));
 
-        List<List<Integer>> vectors = List.of(List.of(1, 1), List.of(1, -1), List.of(-1, 1), List.of(-1, -1));
-
-        getLongSlideMoves(vectors);
-    }
-
-    private void getKnightMoves() {
-
-        List<List<Integer>> jumps = List.of(List.of(-1, 2), List.of(1, 2), List.of(-2, 1), List.of(2, 1), List.of(-2, -1), List.of(2, -1), List.of(-1, -2), List.of(1, -2));
-
-        for (List<Integer> jump : jumps) {
-            movRow = jump.getFirst();
-            movCol = jump.get(1);
-            setNextPosition();
-
-            if (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
-                getOtherPiece();
-                if (otherPiece == null) {
-                    addMove();
-                } else {
-                    otherPieceColor = otherPiece.getTeamColor();
-                    if (!myColor.equals(otherPieceColor)) {
-                        addMove();
-                    }
-                }
-            }
-
-        }
+        getLongSlidingMoves(vectors);
     }
 
     private void getRookMoves() {
-        List<List<Integer>> vectors = List.of(List.of(0,1), List.of(1,0), List.of(0,-1), List.of(-1,0));
+        List<List<Integer>> vectors = List.of(List.of(0,-1), List.of(0,1), List.of(1,0), List.of(-1,0));
 
-        getLongSlideMoves(vectors);
-    }
-
-    private void getQueenMoves() {
-        List<List<Integer>> vectors = List.of(List.of(0,1), List.of(1,0), List.of(0,-1), List.of(-1,0),List.of(1, 1), List.of(1, -1), List.of(-1, 1), List.of(-1, -1));
-
-        getLongSlideMoves(vectors);
+        getLongSlidingMoves(vectors);
     }
 
     private void getKingMoves() {
-
-        List<List<Integer>> moves = List.of(List.of(-1, 1), List.of(0, 1), List.of(1, 1), List.of(-1, 0), List.of(1, 0), List.of(-1, -1), List.of(0, -1), List.of(1, -1));
+        List<List<Integer>> moves = List.of(List.of(0,-1), List.of(0,1), List.of(1,0), List.of(-1,0), List.of(-1,-1), List.of(1,1), List.of(1,-1), List.of(-1,1));
 
         for (List<Integer> move : moves) {
             movRow = move.getFirst();
             movCol = move.get(1);
-            setNextPosition();
+            getNextPosition();
 
             if (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
                 getOtherPiece();
+
                 if (otherPiece == null) {
                     addMove();
                 } else {
                     otherPieceColor = otherPiece.getTeamColor();
-                    if (!myColor.equals(otherPieceColor)) {
+                    if (!(myColor == otherPieceColor)) {
                         addMove();
                     }
                 }
@@ -213,30 +208,29 @@ public class PieceMoveCalculator {
             }
 
         }
-        //getShortSlideMoves(moves);
     }
 
-    private void getLongSlideMoves(List<List<Integer>> vectors) {
-        for (List<Integer> vector : vectors) {
-            movRow = vector.getFirst();
-            movCol = vector.get(1);
-            setNextPosition();
+    private void getKnightMoves() {
+        List<List<Integer>> moves = List.of(List.of(2,-1), List.of(2,1), List.of(1,2), List.of(-1,2), List.of(-2,1), List.of(-2,-1), List.of(-1,-2), List.of(1,-2));
 
-            while (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
+        for (List<Integer> move : moves) {
+            movRow = move.getFirst();
+            movCol = move.get(1);
+            getNextPosition();
+
+            if (0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8) {
                 getOtherPiece();
+
                 if (otherPiece == null) {
                     addMove();
                 } else {
                     otherPieceColor = otherPiece.getTeamColor();
-                    if (!myColor.equals(otherPieceColor)) {
+                    if (!(myColor == otherPieceColor)) {
                         addMove();
                     }
-                    break;
-
                 }
-                nextRow += movRow;
-                nextCol += movCol;
             }
         }
     }
+
 }
