@@ -86,6 +86,7 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
         ChessPiece piece = board.getPiece(startPosition);
 
         if (piece == null) {
@@ -109,6 +110,9 @@ public class ChessGame {
         if (board.getPiece(endPosition) != null) {
             board.addPiece(endPosition, null);
             System.out.println("Real board after enemy piece removal: \n" + board);
+        }
+        if (promotionPiece != null) {
+            piece = new ChessPiece(currentTeam, promotionPiece);
         }
         board.addPiece(endPosition, piece);
         System.out.println("Real board piece in place: \n" + board);
