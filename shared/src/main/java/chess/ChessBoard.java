@@ -43,45 +43,47 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        List<ChessGame.TeamColor> colors = List.of(ChessGame.TeamColor.BLACK, ChessGame.TeamColor.WHITE);
-        List<Integer> rows = List.of(8,1);
+        List<ChessGame.TeamColor> color = List.of(ChessGame.TeamColor.WHITE, ChessGame.TeamColor.BLACK);
+        List<Integer> row = List.of(1,8);
 
         for (int i = 0; i < 2; i++) {
 
-            ChessPiece rook = new ChessPiece(colors.get(i), ChessPiece.PieceType.ROOK);
-            List<ChessPosition> rookPositions = List.of(new ChessPosition(rows.get(i), 1), new ChessPosition(rows.get(i), 8));
-            resetMultiplePieces(rookPositions, rook);
+            ChessPiece king = new ChessPiece(color.get(i), ChessPiece.PieceType.KING);
+            ChessPosition kingPositions = new ChessPosition(row.get(i), 5);
+            addPiece(kingPositions, king);
 
-            ChessPiece knight = new ChessPiece(colors.get(i), ChessPiece.PieceType.KNIGHT);
-            List<ChessPosition> knightPositions = List.of(new ChessPosition(rows.get(i), 2), new ChessPosition(rows.get(i), 7));
-            resetMultiplePieces(knightPositions, knight);
+            ChessPiece queen = new ChessPiece(color.get(i), ChessPiece.PieceType.QUEEN);
+            ChessPosition queenPositions = new ChessPosition(row.get(i), 4);
+            addPiece(queenPositions, queen);
 
-            ChessPiece bishopBlack = new ChessPiece(colors.get(i), ChessPiece.PieceType.BISHOP);
-            List<ChessPosition> bishopBlackPositions = List.of(new ChessPosition(rows.get(i), 3), new ChessPosition(rows.get(i), 6));
-            resetMultiplePieces(bishopBlackPositions, bishopBlack);
+            ChessPiece knight = new ChessPiece(color.get(i), ChessPiece.PieceType.KNIGHT);
+            List<ChessPosition> knightPositions = List.of(new ChessPosition(row.get(i), 2),new ChessPosition(row.get(i), 7));
+            resetMultiplePieces(knight, knightPositions);
 
-            addPiece(new ChessPosition(rows.get(i), 4), new ChessPiece(colors.get(i), ChessPiece.PieceType.QUEEN));
-            addPiece(new ChessPosition(rows.get(i), 5), new ChessPiece(colors.get(i), ChessPiece.PieceType.KING));
+            ChessPiece bishop = new ChessPiece(color.get(i), ChessPiece.PieceType.BISHOP);
+            List<ChessPosition> bishopPositions = List.of(new ChessPosition(row.get(i), 3),new ChessPosition(row.get(i), 6));
+            resetMultiplePieces(bishop, bishopPositions);
 
+            ChessPiece rook = new ChessPiece(color.get(i), ChessPiece.PieceType.ROOK);
+            List<ChessPosition> rookPositions = List.of(new ChessPosition(row.get(i), 1),new ChessPosition(row.get(i), 8));
+            resetMultiplePieces(rook, rookPositions);
         }
 
-        ChessPiece pawnBlack = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
-        List<ChessPosition> pawnBlackPositions = new ArrayList<>();
-        for (int i = 1; i <= 8; i++) {
-            pawnBlackPositions.add(new ChessPosition(7,i));
-        }
-        resetMultiplePieces(pawnBlackPositions,pawnBlack);
+        ChessPiece blackPawn = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
 
-        ChessPiece pawnWhite = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-        List<ChessPosition> pawnWhitePositions = new ArrayList<>();
-        for (int i = 1; i <= 8; i++) {
-            pawnWhitePositions.add(new ChessPosition(2,i));
+        for (int i = 1; i < 9; i++) {
+            addPiece(new ChessPosition(7, i), blackPawn);
         }
-        resetMultiplePieces(pawnWhitePositions,pawnWhite);
+
+        ChessPiece whitePawn = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+
+        for (int i = 1; i < 9; i++) {
+            addPiece(new ChessPosition(2, i), whitePawn);
+        }
 
     }
 
-    public void resetMultiplePieces(List<ChessPosition> positions, ChessPiece piece) {
+    public void resetMultiplePieces(ChessPiece piece, List<ChessPosition> positions) {
         for (ChessPosition position : positions) {
             addPiece(position, piece);
         }
@@ -100,4 +102,15 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(squares);
     }
+
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "squares=" + Arrays.toString(squares) +
+                '}';
+    }
 }
+
+
+
+

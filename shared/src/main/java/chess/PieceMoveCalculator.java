@@ -21,7 +21,6 @@ public class PieceMoveCalculator {
     protected ChessPiece otherPiece;
     protected ChessPosition nextPosition;
 
-
     public Collection<ChessMove> getPieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         this.board = board;

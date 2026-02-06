@@ -21,8 +21,8 @@ public class PawnMoveCalculator {
         } else {
             moves = List.of(List.of(1,0));
         }
-        getAttackMovesCalc(attackMoves, calc);
-        getMovesCalc(moves, calc);
+        getAttackMoves(attackMoves, calc);
+        getMoves(moves, calc);
     }
 
     private void getBlackPawnMoves(PieceMoveCalculator calc) {
@@ -33,11 +33,11 @@ public class PawnMoveCalculator {
         } else {
             moves = List.of(List.of(-1,0));
         }
-        getAttackMovesCalc(attackMoves, calc);
-        getMovesCalc(moves, calc);
+        getAttackMoves(attackMoves, calc);
+        getMoves(moves, calc);
     }
 
-    private void getMovesCalc(List<List<Integer>> moves, PieceMoveCalculator calc) {
+    private void getMoves(List<List<Integer>> moves, PieceMoveCalculator calc) {
         for (List<Integer> move : moves) {
             calc.movRow = move.getFirst();
             calc.movCol = move.get(1);
@@ -58,7 +58,7 @@ public class PawnMoveCalculator {
         }
     }
 
-    private void getAttackMovesCalc(List<List<Integer>> moves, PieceMoveCalculator calc) {
+    private void getAttackMoves(List<List<Integer>> moves, PieceMoveCalculator calc) {
         for (List<Integer> move : moves) {
             calc.movRow = move.getFirst();
             calc.movCol = move.get(1);
