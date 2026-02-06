@@ -14,13 +14,12 @@ import java.util.Objects;
 public class ChessGame {
 
     private ChessBoard board;
-    private ChessBoard tempBoard;
+    private ChessBoard tempBoard = new ChessBoard();
     private TeamColor currentTeam;
 
     public ChessGame() {
         this.board = new ChessBoard();
         board.resetBoard();
-        setBoard(board);
         this.currentTeam = TeamColor.WHITE;
     }
 
@@ -69,9 +68,10 @@ public class ChessGame {
 
         for (ChessMove move : allMoves) {
             testPossibleMove(move);
-            if (!isInCheck(teamColor) || !isInCheckmate(teamColor) || !isInStalemate(teamColor)) {
+            if (!isInCheck(teamColor)) {
                 possibleMoves.add(move);
             }
+            setBoard(board);
         }
         return possibleMoves;
     }
@@ -112,6 +112,7 @@ public class ChessGame {
         ChessPiece piece = tempBoard.getPiece(startPosition);
         tempBoard.addPiece(startPosition, null);
         tempBoard.addPiece(endPosition, piece);
+        System.out.println(tempBoard);
     }
 
     private ChessPosition getKingPosition(TeamColor teamColor) {
@@ -196,7 +197,7 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         this.board = board;
-        tempBoard = new ChessBoard();
+        this.tempBoard = new ChessBoard();
 
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
@@ -208,8 +209,7 @@ public class ChessGame {
                 }
             }
         }
-        System.out.println(board);
-        System.out.println(tempBoard);
+
 
     }
 

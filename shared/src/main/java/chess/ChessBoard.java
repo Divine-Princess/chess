@@ -105,9 +105,11 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        return "ChessBoard{" +
-                "squares=" + Arrays.toString(squares) +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            sb.append(Arrays.toString(squares[i])).append("\n");
+        }
+        return sb.toString();
     }
 }
 
