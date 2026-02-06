@@ -57,12 +57,11 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
 
         ChessPiece piece = tempBoard.getPiece(startPosition);
-        TeamColor teamColor = getTeamTurn();
-
         if (piece == null) {
             return Collections.emptyList();
         }
 
+        TeamColor teamColor = piece.getTeamColor();
         Collection<ChessMove> allMoves = piece.pieceMoves(tempBoard, startPosition);
         Collection<ChessMove> possibleMoves = new ArrayList<>();
 
@@ -73,6 +72,7 @@ public class ChessGame {
             }
             setBoard(board);
         }
+        System.out.println("Possible moves: " + possibleMoves);
         return possibleMoves;
     }
 
@@ -83,6 +83,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        System.out.println(board);
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece piece = board.getPiece(startPosition);
@@ -93,6 +94,11 @@ public class ChessGame {
         }
         if (validMoves.contains(move)) {
             board.addPiece(startPosition, null);
+            System.out.println(board);
+            if (board.getPiece(endPosition) != null) {
+                board.addPiece(endPosition, null);
+                System.out.println(board);
+            }
             board.addPiece(endPosition, piece);
             if (currentTeam == TeamColor.WHITE) {
                 setTeamTurn(TeamColor.BLACK);
@@ -112,7 +118,6 @@ public class ChessGame {
         ChessPiece piece = tempBoard.getPiece(startPosition);
         tempBoard.addPiece(startPosition, null);
         tempBoard.addPiece(endPosition, piece);
-        System.out.println(tempBoard);
     }
 
     private ChessPosition getKingPosition(TeamColor teamColor) {
@@ -156,8 +161,10 @@ public class ChessGame {
         Collection<ChessMove> opposingMoves;
         if (teamColor == TeamColor.WHITE) {
              opposingMoves = getAllOpposingMoves(TeamColor.BLACK);
-        } else {
+        } else if (teamColor == TeamColor.BLACK) {
             opposingMoves = getAllOpposingMoves(TeamColor.WHITE);
+        } else {
+            return false;
         }
         ChessPosition kingPosition = getKingPosition(teamColor);
 
