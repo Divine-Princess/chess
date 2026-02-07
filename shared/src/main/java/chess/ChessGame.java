@@ -13,12 +13,13 @@ import java.util.Objects;
 public class ChessGame {
 
     private ChessBoard board;
-    private ChessBoard tempBoard = new ChessBoard();
+    private ChessBoard tempBoard;
     private TeamColor currentTeam;
 
     public ChessGame() {
         this.board = new ChessBoard();
         board.resetBoard();
+        setBoard(board);
         this.currentTeam = TeamColor.WHITE;
     }
 
@@ -93,7 +94,7 @@ public class ChessGame {
         }
 
         Collection<ChessMove> validMoves = validMoves(startPosition);
-        System.out.println("Real board: \n" + board);
+        //System.out.println("Real board: \n" + board);
 
         if (validMoves == null) {
             return;
@@ -243,8 +244,6 @@ public class ChessGame {
                 }
             }
         }
-
-
     }
 
     /**
@@ -257,16 +256,25 @@ public class ChessGame {
     }
 
     @Override
+    public String toString() {
+        return "ChessGame{" +
+                "board=" + board +
+                ", tempBoard=" + tempBoard +
+                ", currentTeam=" + currentTeam +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(getBoard(), chessGame.getBoard()) && Objects.equals(tempBoard, chessGame.tempBoard) && currentTeam == chessGame.currentTeam;
+        return Objects.equals(getBoard(), chessGame.getBoard()) && currentTeam == chessGame.currentTeam;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBoard(), tempBoard, currentTeam);
+        return Objects.hash(getBoard(), currentTeam);
     }
 }
