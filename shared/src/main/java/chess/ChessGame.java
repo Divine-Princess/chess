@@ -61,7 +61,6 @@ public class ChessGame {
         if (piece == null) {
             return null;
         }
-        System.out.println(piece.getPieceType() + " " + piece.getTeamColor());
         TeamColor teamColor = piece.getTeamColor();
         Collection<ChessMove> allMoves = piece.pieceMoves(tempBoard, startPosition);
         Collection<ChessMove> possibleMoves = new ArrayList<>();
@@ -73,7 +72,6 @@ public class ChessGame {
             }
             setBoard(board);
         }
-        System.out.println("Possible moves: " + possibleMoves);
         return possibleMoves;
     }
 
@@ -94,11 +92,7 @@ public class ChessGame {
         }
 
         Collection<ChessMove> validMoves = validMoves(startPosition);
-        //System.out.println("Real board: \n" + board);
 
-        if (validMoves == null) {
-            return;
-        }
         if (piece.getTeamColor() != currentTeam) {
             throw new InvalidMoveException("Not your turn");
         }
@@ -106,16 +100,15 @@ public class ChessGame {
             throw new InvalidMoveException("Not a valid move");
         }
         board.addPiece(startPosition, null);
-        System.out.println("Real board after piece removal: \n" + board);
+
         if (board.getPiece(endPosition) != null) {
             board.addPiece(endPosition, null);
-            System.out.println("Real board after enemy piece removal: \n" + board);
         }
         if (promotionPiece != null) {
             piece = new ChessPiece(currentTeam, promotionPiece);
         }
         board.addPiece(endPosition, piece);
-        System.out.println("Real board piece in place: \n" + board);
+
         if (currentTeam == TeamColor.WHITE) {
             setTeamTurn(TeamColor.BLACK);
         } else {
@@ -131,7 +124,6 @@ public class ChessGame {
         ChessPiece piece = tempBoard.getPiece(startPosition);
         tempBoard.addPiece(startPosition, null);
         tempBoard.addPiece(endPosition, piece);
-        System.out.println("TempBoard: \n" + tempBoard);
     }
 
     private ChessPosition getKingPosition(TeamColor teamColor) {
