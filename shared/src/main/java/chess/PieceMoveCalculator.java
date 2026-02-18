@@ -103,7 +103,10 @@ public class PieceMoveCalculator {
     }
 
     private void getKingMoves() {
-        List<List<Integer>> moves = List.of(List.of(0,-1), List.of(0,1), List.of(1,0), List.of(-1,0), List.of(-1,-1), List.of(1,1), List.of(1,-1), List.of(-1,1));
+        List<List<Integer>> moves = List.of(List.of(0,-1), List.of(0,1),
+                                    List.of(1,0), List.of(-1,0),
+                                    List.of(-1,-1), List.of(1,1),
+                                    List.of(1,-1), List.of(-1,1));
 
         for (List<Integer> move : moves) {
             movRow = move.getFirst();
@@ -124,7 +127,10 @@ public class PieceMoveCalculator {
     }
 
     private void getKnightMoves() {
-        List<List<Integer>> moves = List.of(List.of(2,-1), List.of(2,1), List.of(1,2), List.of(-1,2), List.of(-2,1), List.of(-2,-1), List.of(-1,-2), List.of(1,-2));
+        List<List<Integer>> moves = List.of(List.of(2,-1), List.of(2,1),
+                                    List.of(1,2), List.of(-1,2),
+                                    List.of(-2,1), List.of(-2,-1),
+                                    List.of(-1,-2), List.of(1,-2));
 
         for (List<Integer> move : moves) {
             movRow = move.getFirst();

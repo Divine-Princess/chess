@@ -80,7 +80,11 @@ public class PawnMoveCalculator {
     }
 
     private void promotePawn(PieceMoveCalculator calc) {
-        ChessPiece.PieceType[] types = {ChessPiece.PieceType.QUEEN,ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.ROOK};
+        ChessPiece.PieceType[] types = {
+                ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.ROOK};
         for (ChessPiece.PieceType type : types) {
             calc.possibleMoves.add(new ChessMove(calc.myPosition, calc.nextPosition, type));
         }
