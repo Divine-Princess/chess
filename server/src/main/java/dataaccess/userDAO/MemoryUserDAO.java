@@ -6,16 +6,20 @@ import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO {
 
-    private final HashMap<String, UserData> user = new HashMap<>();
+    private final HashMap<String, UserData> user;
 
-    @Override
-    public UserData getUser(String username) {
-        return user.get(username);
+    public MemoryUserDAO() {
+        this.user = new HashMap<>();
     }
 
     @Override
     public void createUser(UserData userData) {
         user.put(userData.username(), userData);
+    }
+
+    @Override
+    public UserData getUser(String username) {
+        return user.get(username);
     }
 
     @Override

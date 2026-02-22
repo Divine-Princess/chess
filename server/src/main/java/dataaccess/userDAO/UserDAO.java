@@ -3,9 +3,10 @@ package dataaccess.userDAO;
 import model.data.UserData;
 
 public interface UserDAO {
-    UserData getUser(String username);
 
     void createUser(UserData userData);
+
+    UserData getUser(String username);
 
     void deleteUser(String username);
 
