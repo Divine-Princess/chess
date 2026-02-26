@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.authDAO.MemoryAuthDAO;
 import dataaccess.userDAO.MemoryUserDAO;
 import model.data.UserData;
 import model.request.RegisterRequest;
@@ -13,6 +14,8 @@ public class ServiceTests {
     private UserService testService;
     private RegisterRequest testRequest;
     private RegisterResult testResult;
+    MemoryUserDAO testUserDAO;
+    MemoryAuthDAO testAuthDAO;
 
     // Register Service Tests
 
@@ -22,7 +25,9 @@ public class ServiceTests {
     @DisplayName("Register Success")
     public void registerSuccess() {
         // empty request
-        testService = new UserService();
+        testUserDAO = new MemoryUserDAO();
+        testAuthDAO = new MemoryAuthDAO();
+        testService = new UserService(testUserDAO, testAuthDAO);
         testRequest = new RegisterRequest("emma","1234","emma@email.com");
         testResult = testService.register(testRequest);
 
@@ -37,7 +42,9 @@ public class ServiceTests {
     @DisplayName("Register Bad Request")
     public void registerBadRequest() {
         // empty request
-        testService = new UserService();
+        testUserDAO = new MemoryUserDAO();
+        testAuthDAO = new MemoryAuthDAO();
+        testService = new UserService(testUserDAO, testAuthDAO);
         RegisterRequest[] badRequests = {
                 new RegisterRequest("", "", ""),
                 new RegisterRequest("emma", "1234", ""),
@@ -56,8 +63,9 @@ public class ServiceTests {
     @Order(3)
     @DisplayName("Register Already Taken")
     public void registerAlreadyTaken() {
-        testService = new UserService();
-        MemoryUserDAO testUserDAO = new MemoryUserDAO();
+        testUserDAO = new MemoryUserDAO();
+        testAuthDAO = new MemoryAuthDAO();
+        testService = new UserService(testUserDAO, testAuthDAO);
 
         UserData[] testUsers = {
                 new UserData("emma", "1234", "emma.email.com"),
