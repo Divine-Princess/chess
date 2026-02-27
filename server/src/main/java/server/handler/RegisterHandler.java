@@ -6,7 +6,7 @@ import model.request.RegisterRequest;
 import model.result.RegisterResult;
 import service.UserService;
 
-public class RegisterHandler {
+public class RegisterHandler implements Handler {
 
     private final UserService userService;
 

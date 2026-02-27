@@ -4,13 +4,19 @@ import dataaccess.authDAO.MemoryAuthDAO;
 import dataaccess.gameDAO.MemoryGameDAO;
 import dataaccess.userDAO.MemoryUserDAO;
 import model.data.UserData;
+import model.request.ListGamesRequest;
 import model.request.LoginRequest;
+import model.request.LogoutRequest;
 import model.request.RegisterRequest;
+import model.result.ListGamesResult;
 import model.result.LoginResult;
+import model.result.LogoutResult;
 import model.result.RegisterResult;
 import org.junit.jupiter.api.*;
 import server.AlreadyTakenException;
 import server.BadRequestException;
+
+import java.util.List;
 
 public class ServiceTests {
 
@@ -21,7 +27,15 @@ public class ServiceTests {
     private MemoryAuthDAO testAuthDAO;
     private MemoryGameDAO testGameDAO;
 
-    // Register Service Tests
+    @BeforeEach
+    public void initialize() {
+        testUserDAO = new MemoryUserDAO();
+        testAuthDAO = new MemoryAuthDAO();
+        testGameDAO = new MemoryGameDAO();
+        testUserService = new UserService(testUserDAO, testAuthDAO);
+        testGameService = new GameService(testGameDAO, testAuthDAO);
+        testAuthService = new AuthService(testAuthDAO);
+    }
 
     // Register Success:
     @Test
@@ -29,9 +43,6 @@ public class ServiceTests {
     @DisplayName("Register Success")
     public void registerSuccess() {
         // empty request
-        testUserDAO = new MemoryUserDAO();
-        testAuthDAO = new MemoryAuthDAO();
-        testUserService = new UserService(testUserDAO, testAuthDAO);
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         RegisterResult testRegisterResult = testUserService.register(testRegisterRequest);
 
@@ -46,9 +57,6 @@ public class ServiceTests {
     @DisplayName("Register Bad Request")
     public void registerBadRequest() {
         // empty request
-        testUserDAO = new MemoryUserDAO();
-        testAuthDAO = new MemoryAuthDAO();
-        testUserService = new UserService(testUserDAO, testAuthDAO);
         RegisterRequest[] badRequests = {
                 new RegisterRequest("", "", ""),
                 new RegisterRequest("emma", "1234", ""),
@@ -67,10 +75,6 @@ public class ServiceTests {
     @Order(3)
     @DisplayName("Register Already Taken")
     public void registerAlreadyTaken() {
-        testUserDAO = new MemoryUserDAO();
-        testAuthDAO = new MemoryAuthDAO();
-        testUserService = new UserService(testUserDAO, testAuthDAO);
-
         UserData[] testUsers = {
                 new UserData("emma", "1234", "emma.email.com"),
                 new UserData("beans", "NOOOO", "bean.bean.com"),
@@ -92,15 +96,12 @@ public class ServiceTests {
         }
     }
 
+
     @Test
     @Order(4)
     @DisplayName("Login Success")
     public void loginSuccess() {
         // empty request
-        testUserDAO = new MemoryUserDAO();
-        testAuthDAO = new MemoryAuthDAO();
-        testUserService = new UserService(testUserDAO, testAuthDAO);
-
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -117,9 +118,6 @@ public class ServiceTests {
     @DisplayName("Login Bad Request")
     public void loginBadRequest() {
         // empty request
-        testUserDAO = new MemoryUserDAO();
-        testAuthDAO = new MemoryAuthDAO();
-        testUserService = new UserService(testUserDAO, testAuthDAO);
         LoginRequest[] badRequests = {
                 new LoginRequest("", ""),
                 new LoginRequest("emma",""),
@@ -133,6 +131,53 @@ public class ServiceTests {
     }
 
 
+    @Test
+    @Order(6)
+    @DisplayName("Logout Success")
+    public void logoutSuccess() {
+        // empty request
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        testUserService.register(testRegisterRequest);
+
+        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+
+        String authToken = testLoginResult.authToken();
+
+        LogoutRequest testLogoutRequest = new LogoutRequest(authToken);
+        LogoutResult testLogoutResult = testUserService.logout(testLogoutRequest);
+
+        Assertions.assertNotNull(testLogoutResult, "Expected LogoutRequest, returned null");
+
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Logout Bad Request")
+    public void logoutBadRequest() {
+        LogoutRequest badRequest = new LogoutRequest("");
+
+        Assertions.assertThrows(BadRequestException.class, () -> testUserService.logout(badRequest));
+    }
+
+
+    @Test
+    @Order(7)
+    @DisplayName("List Games Success")
+    public void listGamesSuccess() {
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        testUserService.register(testRegisterRequest);
+
+        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+
+        String authToken = testLoginResult.authToken();
+
+        ListGamesRequest testListReq = new ListGamesRequest(authToken);
+
+        testGameService.listGames.(testListReq)
+
+    }
 
 //    @Test
 //    @Order(4)

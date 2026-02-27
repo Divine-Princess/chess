@@ -8,9 +8,19 @@ import service.AuthService;
 import service.GameService;
 import service.UserService;
 
-public class ClearHandler {
+public class ClearHandler implements Handler {
 
-    public void handle(Context context, UserService userService, GameService gameService, AuthService authService) {
+    private final UserService userService;
+    private final GameService gameService;
+    private final AuthService authService;
+
+    public ClearHandler(UserService userService, GameService gameService, AuthService authService) {
+        this.userService = userService;
+        this.gameService = gameService;
+        this.authService = authService;
+    }
+
+    public void handle(Context context) {
 
         ClearRequest request = new Gson().fromJson(context.body(), ClearRequest.class);
         ClearResult result = userService.clear(request);

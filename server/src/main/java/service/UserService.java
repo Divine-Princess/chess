@@ -6,9 +6,11 @@ import model.data.AuthData;
 import model.data.UserData;
 import model.request.ClearRequest;
 import model.request.LoginRequest;
+import model.request.LogoutRequest;
 import model.request.RegisterRequest;
 import model.result.ClearResult;
 import model.result.LoginResult;
+import model.result.LogoutResult;
 import model.result.RegisterResult;
 import server.AlreadyTakenException;
 import server.BadRequestException;
@@ -19,8 +21,8 @@ import java.util.UUID;
 
 public class UserService {
 
-    private UserDAO userDAO;
-    private AuthDAO authDAO;
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
 
     public UserService(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
@@ -54,25 +56,6 @@ public class UserService {
         return new RegisterResult(registerRequest.username(), authToken);
     }
 
-    private String generateToken() {
-        return UUID.randomUUID().toString();
-    }
-
-    public ClearResult clear(ClearRequest clearRequest) {
-        userDAO.clear();
-
-        return new ClearResult();
-    }
-
-    private String createToken(UserData user) {
-        String authToken = generateToken();
-        AuthData newAuthData = new AuthData(authToken, user.username());
-
-        authDAO.createAuth(newAuthData);
-
-        return authToken;
-    }
-
     public LoginResult login(LoginRequest loginRequest) throws BadRequestException, UnauthorizedException {
         String username = loginRequest.username();
         String password = loginRequest.password();
@@ -97,6 +80,39 @@ public class UserService {
         String authToken = createToken(user);
 
         return new LoginResult(username, authToken);
+    }
+
+    public LogoutResult logout(LogoutRequest logoutRequest) throws UnauthorizedException {
+        String authToken = logoutRequest.authToken();
+
+        AuthData existingToken = authDAO.getAuth(authToken);
+
+        if (existingToken == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+
+        authDAO.deleteAuth(authToken);
+
+        return new LogoutResult();
+    }
+
+    public ClearResult clear(ClearRequest clearRequest) {
+        userDAO.clear();
+
+        return new ClearResult();
+    }
+
+    private String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    private String createToken(UserData user) {
+        String authToken = generateToken();
+        AuthData newAuthData = new AuthData(authToken, user.username());
+
+        authDAO.createAuth(newAuthData);
+
+        return authToken;
     }
 
     @Override

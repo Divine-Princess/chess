@@ -9,9 +9,7 @@ import dataaccess.userDAO.MemoryUserDAO;
 import dataaccess.userDAO.UserDAO;
 import io.javalin.*;
 import io.javalin.http.Context;
-import server.handler.ClearHandler;
-import server.handler.LoginHandler;
-import server.handler.RegisterHandler;
+import server.handler.*;
 import service.GameService;
 import service.UserService;
 import service.AuthService;
@@ -26,30 +24,23 @@ public class Server {
     UserService userService;
     GameService gameService;
     AuthService authService;
-    RegisterHandler registerHandler;
-    ClearHandler clearHandler;
-    LoginHandler loginHandler;
+    Handler registerHandler;
+    Handler clearHandler;
+    Handler loginHandler;
+    Handler logoutHandler;
 
     private final Javalin javalin;
 
     public Server() {
-        userDAO = new MemoryUserDAO();
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
-        userService = new UserService(userDAO,authDAO);
-        gameService = new GameService(gameDAO,authDAO);
-        authService = new AuthService(authDAO);
-        registerHandler = new RegisterHandler(userService);
-        clearHandler = new ClearHandler();
-        loginHandler = new LoginHandler(userService);
+        initializeServer();
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                          .post("/user", context -> registerHandler.handle(context))
                          .post("/session", context -> loginHandler.handle(context))
                          .exception(Exception.class, this::exceptionHandler)
                          .delete("/db", context
-                                 -> clearHandler.handle(context, userService, gameService, authService));
-                         //.delete("/session", );
+                                 -> clearHandler.handle(context))
+                         .delete("/session", context -> logoutHandler.handle(context));
     }
 
     public int run(int desiredPort) {
@@ -64,18 +55,25 @@ public class Server {
     private void exceptionHandler(Exception e, Context context) {
         var body = new Gson().toJson(Map.of("message", String.format(e.getMessage())));
 
-        if (e instanceof BadRequestException) {
-            context.status(400);
-        }
-        else if (e instanceof UnauthorizedException) {
-            context.status(401);
-        }
-        else if (e instanceof AlreadyTakenException) {
-            context.status(403);
-        }
-        else {
-            context.status(500);
+        switch (e) {
+            case BadRequestException badRequestException -> context.status(400);
+            case UnauthorizedException unauthorizedException -> context.status(401);
+            case AlreadyTakenException alreadyTakenException -> context.status(403);
+            default -> context.status(500);
         }
         context.json(body);
+    }
+
+    private void initializeServer() {
+        userDAO = new MemoryUserDAO();
+        authDAO = new MemoryAuthDAO();
+        gameDAO = new MemoryGameDAO();
+        userService = new UserService(userDAO,authDAO);
+        gameService = new GameService(gameDAO,authDAO);
+        authService = new AuthService(authDAO);
+        registerHandler = new RegisterHandler(userService);
+        clearHandler = new ClearHandler(userService, gameService, authService);
+        loginHandler = new LoginHandler(userService);
+        logoutHandler = new LogoutHandler(userService);
     }
 }

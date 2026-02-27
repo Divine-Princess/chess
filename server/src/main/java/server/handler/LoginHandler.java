@@ -6,7 +6,7 @@ import model.request.LoginRequest;
 import model.result.LoginResult;
 import service.UserService;
 
-public class LoginHandler {
+public class LoginHandler implements Handler {
 
     private final UserService userService;
 
