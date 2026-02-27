@@ -8,7 +8,7 @@ import service.UserService;
 
 public class RegisterHandler {
 
-    private UserService userService;
+    private final UserService userService;
 
     public RegisterHandler(UserService userService) {
         this.userService = userService;

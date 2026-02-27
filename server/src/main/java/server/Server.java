@@ -10,6 +10,7 @@ import dataaccess.userDAO.UserDAO;
 import io.javalin.*;
 import io.javalin.http.Context;
 import server.handler.ClearHandler;
+import server.handler.LoginHandler;
 import server.handler.RegisterHandler;
 import service.GameService;
 import service.UserService;
@@ -26,6 +27,8 @@ public class Server {
     GameService gameService;
     AuthService authService;
     RegisterHandler registerHandler;
+    ClearHandler clearHandler;
+    LoginHandler loginHandler;
 
     private final Javalin javalin;
 
@@ -37,12 +40,16 @@ public class Server {
         gameService = new GameService(gameDAO,authDAO);
         authService = new AuthService(authDAO);
         registerHandler = new RegisterHandler(userService);
+        clearHandler = new ClearHandler();
+        loginHandler = new LoginHandler(userService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                          .post("/user", context -> registerHandler.handle(context))
+                         .post("/session", context -> loginHandler.handle(context))
                          .exception(Exception.class, this::exceptionHandler)
                          .delete("/db", context
-                                 -> new ClearHandler().handle(context, userService, gameService, authService));
+                                 -> clearHandler.handle(context, userService, gameService, authService));
+                         //.delete("/session", );
     }
 
     public int run(int desiredPort) {
@@ -59,6 +66,9 @@ public class Server {
 
         if (e instanceof BadRequestException) {
             context.status(400);
+        }
+        else if (e instanceof UnauthorizedException) {
+            context.status(401);
         }
         else if (e instanceof AlreadyTakenException) {
             context.status(403);

@@ -4,9 +4,9 @@ import dataaccess.authDAO.MemoryAuthDAO;
 import dataaccess.gameDAO.MemoryGameDAO;
 import dataaccess.userDAO.MemoryUserDAO;
 import model.data.UserData;
-import model.request.ClearRequest;
+import model.request.LoginRequest;
 import model.request.RegisterRequest;
-import model.result.ClearResult;
+import model.result.LoginResult;
 import model.result.RegisterResult;
 import org.junit.jupiter.api.*;
 import server.AlreadyTakenException;
@@ -17,8 +17,6 @@ public class ServiceTests {
     private UserService testUserService;
     private GameService testGameService;
     private AuthService testAuthService;
-    private RegisterRequest testRequest;
-    private RegisterResult testResult;
     private MemoryUserDAO testUserDAO;
     private MemoryAuthDAO testAuthDAO;
     private MemoryGameDAO testGameDAO;
@@ -34,12 +32,12 @@ public class ServiceTests {
         testUserDAO = new MemoryUserDAO();
         testAuthDAO = new MemoryAuthDAO();
         testUserService = new UserService(testUserDAO, testAuthDAO);
-        testRequest = new RegisterRequest("emma","1234","emma@email.com");
-        testResult = testUserService.register(testRequest);
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        RegisterResult testRegisterResult = testUserService.register(testRegisterRequest);
 
-        Assertions.assertNotNull(testResult, "Expected RegisterRequest, returned null");
-        Assertions.assertEquals(testRequest.username(), testResult.username(), "Returned wrong username");
-        Assertions.assertFalse(testResult.authToken().isEmpty(), "AuthToken is empty!");
+        Assertions.assertNotNull(testRegisterResult, "Expected RegisterRequest, returned null");
+        Assertions.assertEquals(testRegisterRequest.username(), testRegisterResult.username(), "Returned wrong username");
+        Assertions.assertFalse(testRegisterResult.authToken().isEmpty(), "AuthToken is empty!");
     }
 
     // Register Error: BadRequestException:
@@ -94,6 +92,48 @@ public class ServiceTests {
         }
     }
 
+    @Test
+    @Order(4)
+    @DisplayName("Login Success")
+    public void loginSuccess() {
+        // empty request
+        testUserDAO = new MemoryUserDAO();
+        testAuthDAO = new MemoryAuthDAO();
+        testUserService = new UserService(testUserDAO, testAuthDAO);
+
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        testUserService.register(testRegisterRequest);
+
+        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+
+        Assertions.assertNotNull(testLoginResult, "Expected LoginRequest, returned null");
+        Assertions.assertEquals(testLoginRequest.username(), testLoginResult.username(), "Returned wrong username");
+        Assertions.assertFalse(testLoginResult.authToken().isEmpty(), "AuthToken is empty!");
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Login Bad Request")
+    public void loginBadRequest() {
+        // empty request
+        testUserDAO = new MemoryUserDAO();
+        testAuthDAO = new MemoryAuthDAO();
+        testUserService = new UserService(testUserDAO, testAuthDAO);
+        LoginRequest[] badRequests = {
+                new LoginRequest("", ""),
+                new LoginRequest("emma",""),
+                new LoginRequest("", "1234")
+        };
+
+        for (LoginRequest badRequest : badRequests) {
+            Assertions.assertThrows(BadRequestException.class, () -> testUserService.login(badRequest));
+        }
+
+    }
+
+
+
 //    @Test
 //    @Order(4)
 //    @DisplayName("Clear Success")
@@ -119,6 +159,8 @@ public class ServiceTests {
 //        testUserService.clear(clearRequest);
 //        testGameService.clear(clearRequest);
 //        testAuthService.clear(clearRequest);
+//
+//
 //
 //    }
 
