@@ -7,7 +7,14 @@ import model.result.RegisterResult;
 import service.UserService;
 
 public class RegisterHandler {
-    public void handle(UserService userService, Context context) {
+
+    private UserService userService;
+
+    public RegisterHandler(UserService userService) {
+        this.userService = userService;
+    }
+
+    public void handle(Context context) {
 
         RegisterRequest request = new Gson().fromJson(context.body(), RegisterRequest.class);
         RegisterResult result = userService.register(request);

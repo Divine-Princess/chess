@@ -19,24 +19,30 @@ import javax.imageio.spi.RegisterableService;
 import java.util.Map;
 
 public class Server {
+    UserDAO userDAO;
+    AuthDAO authDAO;
+    GameDAO gameDAO;
+    UserService userService;
+    GameService gameService;
+    AuthService authService;
+    RegisterHandler registerHandler;
 
     private final Javalin javalin;
 
     public Server() {
-        UserDAO userDAO = new MemoryUserDAO();
-        AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
-        UserService userService = new UserService(userDAO,authDAO);
-        GameService gameService = new GameService(gameDAO,authDAO);
-        AuthService authService = new AuthService(authDAO);
-        RegisterHandler registerHandler = new RegisterHandler();
-        ClearHandler clearHandler = new ClearHandler();
+        userDAO = new MemoryUserDAO();
+        authDAO = new MemoryAuthDAO();
+        gameDAO = new MemoryGameDAO();
+        userService = new UserService(userDAO,authDAO);
+        gameService = new GameService(gameDAO,authDAO);
+        authService = new AuthService(authDAO);
+        registerHandler = new RegisterHandler(userService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
-                         .post("/user", context -> registerHandler.handle(userService, context))
+                         .post("/user", context -> registerHandler.handle(context))
                          .exception(Exception.class, this::exceptionHandler)
                          .delete("/db", context
-                                 -> clearHandler.handle(context, userService, gameService, authService));
+                                 -> new ClearHandler().handle(context, userService, gameService, authService));
     }
 
     public int run(int desiredPort) {

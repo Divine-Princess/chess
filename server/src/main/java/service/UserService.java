@@ -22,6 +22,7 @@ public class UserService {
     public UserService(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
+        System.out.println("SERVICE REGISTER CALLED");
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws AlreadyTakenException, BadRequestException {
@@ -29,10 +30,11 @@ public class UserService {
         String password = registerRequest.password();
         String email = registerRequest.email();
 
-        if (Objects.equals(username, "") ||
-                Objects.equals(password, "") ||
-                Objects.equals(email, "")) {
+        if (username == null || password == null || email == null) {
             throw new BadRequestException("Error: Missing username, password, or email.");
+        }
+        else if (username.isBlank() || password.isBlank() || email.isBlank()) {
+            throw new BadRequestException("Error: Username, password, or email cannot be blank.");
         }
 
 
@@ -49,6 +51,8 @@ public class UserService {
 
         authDAO.createAuth(newAuthData);
 
+        userDAO.createUser(newUser);
+
         return new RegisterResult(registerRequest.username(), authToken);
     }
 
@@ -61,4 +65,13 @@ public class UserService {
 
         return new ClearResult();
     }
+
+    @Override
+    public String toString() {
+        return "UserService{" +
+                "userDAO=" + userDAO +
+                ", authDAO=" + authDAO +
+                '}';
+    }
 }
+
