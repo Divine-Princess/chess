@@ -2,11 +2,12 @@ package dataaccess.gameDAO;
 
 import model.data.GameData;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO{
 
-    private final HashMap<String, GameData> game;
+    private final HashMap<Integer, GameData> game;
 
     public MemoryGameDAO() {
         this.game = new HashMap<>();
@@ -14,19 +15,23 @@ public class MemoryGameDAO implements GameDAO{
 
     @Override
     public void createGame(GameData gameData) {
-        game.put(gameData.gameName(), gameData);
+        game.put(gameData.gameID(), gameData);
     }
 
     @Override
-    public GameData getGame(String gameName) {
-        return game.get(gameName);
+    public GameData getGame(int gameID) {
+        return game.get(gameID);
     }
 
     @Override
-    public void deleteGame(String gameName) {
-        game.remove(gameName);
+    public Collection<GameData> listGames() {
+        return game.values();
     }
 
+    @Override
+    public void deleteGame(int gameID) {
+        game.remove(gameID);
+    }
     @Override
     public void clear() {
         game.clear();

@@ -28,6 +28,7 @@ public class Server {
     Handler clearHandler;
     Handler loginHandler;
     Handler logoutHandler;
+    Handler listGamesHandler;
 
     private final Javalin javalin;
 
@@ -37,10 +38,10 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                          .post("/user", context -> registerHandler.handle(context))
                          .post("/session", context -> loginHandler.handle(context))
-                         .exception(Exception.class, this::exceptionHandler)
-                         .delete("/db", context
-                                 -> clearHandler.handle(context))
-                         .delete("/session", context -> logoutHandler.handle(context));
+                         .get("/game", context -> listGamesHandler.handle(context))
+                         .delete("/db", context -> clearHandler.handle(context))
+                         .delete("/session", context -> logoutHandler.handle(context))
+                         .exception(Exception.class, this::exceptionHandler);
     }
 
     public int run(int desiredPort) {
@@ -75,5 +76,6 @@ public class Server {
         clearHandler = new ClearHandler(userService, gameService, authService);
         loginHandler = new LoginHandler(userService);
         logoutHandler = new LogoutHandler(userService);
+        listGamesHandler = new ListGamesHandler(gameService);
     }
 }

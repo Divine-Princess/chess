@@ -15,8 +15,7 @@ import model.result.RegisterResult;
 import org.junit.jupiter.api.*;
 import server.AlreadyTakenException;
 import server.BadRequestException;
-
-import java.util.List;
+import server.UnauthorizedException;
 
 public class ServiceTests {
 
@@ -153,16 +152,16 @@ public class ServiceTests {
 
     @Test
     @Order(7)
-    @DisplayName("Logout Bad Request")
-    public void logoutBadRequest() {
-        LogoutRequest badRequest = new LogoutRequest("");
+    @DisplayName("Logout Unauthorized")
+    public void logoutUnauthorized() {
+        LogoutRequest emptyRequest = new LogoutRequest("");
 
-        Assertions.assertThrows(BadRequestException.class, () -> testUserService.logout(badRequest));
+        Assertions.assertThrows(UnauthorizedException.class, () -> testUserService.logout(emptyRequest));
     }
 
 
     @Test
-    @Order(7)
+    @Order(8)
     @DisplayName("List Games Success")
     public void listGamesSuccess() {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
@@ -175,9 +174,50 @@ public class ServiceTests {
 
         ListGamesRequest testListReq = new ListGamesRequest(authToken);
 
-        testGameService.listGames.(testListReq)
+        ListGamesResult testListResult = testGameService.listGames(testListReq);
 
+        Assertions.assertNotNull(testListResult, "Expected ListGamesRequest, returned null");
+        Assertions.assertNotNull(testListResult.games(), "Expected type:Collection, returned null");
     }
+
+    @Test
+    @Order(9)
+    @DisplayName("List Games Unauthorized")
+    public void listGamesUnauthorized() {
+//        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+//        testUserService.register(testRegisterRequest);
+//
+//        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+//        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+//
+//        String authToken = testLoginResult.authToken();
+
+        ListGamesRequest testListReq = new ListGamesRequest("");
+
+        Assertions.assertThrows(UnauthorizedException.class, () -> testGameService.listGames(testListReq));
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("Create Game Success")
+    public void createGameSuccess() {
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        testUserService.register(testRegisterRequest);
+
+        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+
+        String authToken = testLoginResult.authToken();
+
+         testListReq = new ListGamesRequest(authToken);
+
+        ListGamesResult testListResult = testGameService.listGames(testListReq);
+
+        Assertions.assertNotNull(testListResult, "Expected ListGamesRequest, returned null");
+        Assertions.assertNotNull(testListResult.games(), "Expected type:Collection, returned null");
+    }
+
+
 
 //    @Test
 //    @Order(4)
