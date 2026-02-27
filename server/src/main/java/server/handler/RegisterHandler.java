@@ -4,11 +4,7 @@ import com.google.gson.Gson;
 import io.javalin.http.Context;
 import model.request.RegisterRequest;
 import model.result.RegisterResult;
-import server.AlreadyTakenException;
-import server.BadRequestException;
 import service.UserService;
-
-import java.util.Map;
 
 public class RegisterHandler {
     public void handle(UserService userService, Context context) {

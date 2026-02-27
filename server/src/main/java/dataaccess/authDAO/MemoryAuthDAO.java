@@ -25,4 +25,9 @@ public class MemoryAuthDAO implements AuthDAO{
     public void deleteAuth(String authToken) {
         auth.remove(authToken);
     }
+
+    @Override
+    public void clear() {
+        auth.clear();
+    }
 }

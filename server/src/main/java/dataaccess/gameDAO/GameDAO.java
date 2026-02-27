@@ -1,13 +1,14 @@
 package dataaccess.gameDAO;
 
+import model.data.GameData;
+
 public interface GameDAO {
-    // getGame(playerColor, gameID)
 
-    // getGamesList()
+    public void createGame(GameData gameData);
 
-    // void createGame(gameData)
+    public GameData getGame(String gameName);
 
-    // updateGame(playerColor, gameID, username)
+    public void deleteGame(String username);
 
-    // void deleteGame()
+    public void clear();
 }

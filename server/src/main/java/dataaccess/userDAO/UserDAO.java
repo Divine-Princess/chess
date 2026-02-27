@@ -10,5 +10,5 @@ public interface UserDAO {
 
     void deleteUser(String username);
 
-
+    void clear();
 }

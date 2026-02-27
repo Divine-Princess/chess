@@ -1,9 +1,12 @@
 package service;
 
 import dataaccess.authDAO.MemoryAuthDAO;
+import dataaccess.gameDAO.MemoryGameDAO;
 import dataaccess.userDAO.MemoryUserDAO;
 import model.data.UserData;
+import model.request.ClearRequest;
 import model.request.RegisterRequest;
+import model.result.ClearResult;
 import model.result.RegisterResult;
 import org.junit.jupiter.api.*;
 import server.AlreadyTakenException;
@@ -11,11 +14,14 @@ import server.BadRequestException;
 
 public class ServiceTests {
 
-    private UserService testService;
+    private UserService testUserService;
+    private GameService testGameService;
+    private AuthService testAuthService;
     private RegisterRequest testRequest;
     private RegisterResult testResult;
-    MemoryUserDAO testUserDAO;
-    MemoryAuthDAO testAuthDAO;
+    private MemoryUserDAO testUserDAO;
+    private MemoryAuthDAO testAuthDAO;
+    private MemoryGameDAO testGameDAO;
 
     // Register Service Tests
 
@@ -27,9 +33,9 @@ public class ServiceTests {
         // empty request
         testUserDAO = new MemoryUserDAO();
         testAuthDAO = new MemoryAuthDAO();
-        testService = new UserService(testUserDAO, testAuthDAO);
+        testUserService = new UserService(testUserDAO, testAuthDAO);
         testRequest = new RegisterRequest("emma","1234","emma@email.com");
-        testResult = testService.register(testRequest);
+        testResult = testUserService.register(testRequest);
 
         Assertions.assertNotNull(testResult, "Expected RegisterRequest, returned null");
         Assertions.assertEquals(testRequest.username(), testResult.username(), "Returned wrong username");
@@ -44,7 +50,7 @@ public class ServiceTests {
         // empty request
         testUserDAO = new MemoryUserDAO();
         testAuthDAO = new MemoryAuthDAO();
-        testService = new UserService(testUserDAO, testAuthDAO);
+        testUserService = new UserService(testUserDAO, testAuthDAO);
         RegisterRequest[] badRequests = {
                 new RegisterRequest("", "", ""),
                 new RegisterRequest("emma", "1234", ""),
@@ -53,7 +59,7 @@ public class ServiceTests {
         };
 
         for (RegisterRequest badRequest : badRequests) {
-            Assertions.assertThrows(BadRequestException.class, () -> testService.register(badRequest));
+            Assertions.assertThrows(BadRequestException.class, () -> testUserService.register(badRequest));
         }
 
     }
@@ -65,7 +71,7 @@ public class ServiceTests {
     public void registerAlreadyTaken() {
         testUserDAO = new MemoryUserDAO();
         testAuthDAO = new MemoryAuthDAO();
-        testService = new UserService(testUserDAO, testAuthDAO);
+        testUserService = new UserService(testUserDAO, testAuthDAO);
 
         UserData[] testUsers = {
                 new UserData("emma", "1234", "emma.email.com"),
@@ -84,9 +90,37 @@ public class ServiceTests {
         };
 
         for (RegisterRequest existingUser : existingUsers) {
-            Assertions.assertThrows(AlreadyTakenException.class, () -> testService.register(existingUser));
+            Assertions.assertThrows(AlreadyTakenException.class, () -> testUserService.register(existingUser));
         }
     }
+
+//    @Test
+//    @Order(4)
+//    @DisplayName("Clear Success")
+//    public void testClear() {
+//        testUserDAO = new MemoryUserDAO();
+//        testAuthDAO = new MemoryAuthDAO();
+//        testGameDAO = new MemoryGameDAO();
+//        testUserService = new UserService(testUserDAO, testAuthDAO);
+//        testGameService = new GameService(testGameDAO, testAuthDAO);
+//        testAuthService = new AuthService(testAuthDAO);
+//
+//        UserData[] testUsers = {
+//                new UserData("emma", "1234", "emma.email.com"),
+//                new UserData("beans", "NOOOO", "bean.bean.com"),
+//                new UserData("Mario", "itsAMe", "mario@nintendo.com")
+//        };
+//
+//        for (UserData testUser : testUsers) {
+//            testUserDAO.createUser(testUser);
+//        }
+//
+//        ClearRequest clearRequest = new ClearRequest();
+//        testUserService.clear(clearRequest);
+//        testGameService.clear(clearRequest);
+//        testAuthService.clear(clearRequest);
+//
+//    }
 
 
 

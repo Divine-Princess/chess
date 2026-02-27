@@ -4,7 +4,9 @@ import dataaccess.authDAO.AuthDAO;
 import dataaccess.userDAO.UserDAO;
 import model.data.AuthData;
 import model.data.UserData;
+import model.request.ClearRequest;
 import model.request.RegisterRequest;
+import model.result.ClearResult;
 import model.result.RegisterResult;
 import server.AlreadyTakenException;
 import server.BadRequestException;
@@ -52,5 +54,11 @@ public class UserService {
 
     private static String generateToken() {
         return UUID.randomUUID().toString();
+    }
+
+    public ClearResult clear(ClearRequest clearRequest) {
+        userDAO.clear();
+
+        return new ClearResult();
     }
 }
