@@ -4,14 +4,8 @@ import dataaccess.authDAO.MemoryAuthDAO;
 import dataaccess.gameDAO.MemoryGameDAO;
 import dataaccess.userDAO.MemoryUserDAO;
 import model.data.UserData;
-import model.request.ListGamesRequest;
-import model.request.LoginRequest;
-import model.request.LogoutRequest;
-import model.request.RegisterRequest;
-import model.result.ListGamesResult;
-import model.result.LoginResult;
-import model.result.LogoutResult;
-import model.result.RegisterResult;
+import model.request.*;
+import model.result.*;
 import org.junit.jupiter.api.*;
 import server.AlreadyTakenException;
 import server.BadRequestException;
@@ -209,15 +203,38 @@ public class ServiceTests {
 
         String authToken = testLoginResult.authToken();
 
-         testListReq = new ListGamesRequest(authToken);
+        CreateGameRequest testReq = new CreateGameRequest(authToken, "beepbeep");
 
-        ListGamesResult testListResult = testGameService.listGames(testListReq);
+        CreateGameResult testResult = testGameService.createGame(testReq);
 
-        Assertions.assertNotNull(testListResult, "Expected ListGamesRequest, returned null");
-        Assertions.assertNotNull(testListResult.games(), "Expected type:Collection, returned null");
+        Assertions.assertNotNull(testResult, "Expected ListGamesRequest, returned null");
     }
 
+    @Test
+    @Order(11)
+    @DisplayName("Create Game Unauthorized")
+    public void createGameUnauthorized() {
+        CreateGameRequest emptyRequest = new CreateGameRequest("", "");
 
+        Assertions.assertThrows(UnauthorizedException.class, () -> testGameService.createGame(emptyRequest));
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("Create Game Bad Request")
+    public void createGameBadRequest() {
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        testUserService.register(testRegisterRequest);
+
+        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+
+        String authToken = testLoginResult.authToken();
+
+        CreateGameRequest badRequest = new CreateGameRequest(authToken, null);
+
+        Assertions.assertThrows(BadRequestException.class, () -> testGameService.createGame(badRequest));
+    }
 
 //    @Test
 //    @Order(4)

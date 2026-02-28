@@ -13,8 +13,6 @@ import server.handler.*;
 import service.GameService;
 import service.UserService;
 import service.AuthService;
-
-import javax.imageio.spi.RegisterableService;
 import java.util.Map;
 
 public class Server {
@@ -29,6 +27,7 @@ public class Server {
     Handler loginHandler;
     Handler logoutHandler;
     Handler listGamesHandler;
+    Handler createGameHandler;
 
     private final Javalin javalin;
 
@@ -38,6 +37,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                          .post("/user", context -> registerHandler.handle(context))
                          .post("/session", context -> loginHandler.handle(context))
+                         .post("/game", context -> createGameHandler.handle(context))
                          .get("/game", context -> listGamesHandler.handle(context))
                          .delete("/db", context -> clearHandler.handle(context))
                          .delete("/session", context -> logoutHandler.handle(context))
@@ -77,5 +77,6 @@ public class Server {
         loginHandler = new LoginHandler(userService);
         logoutHandler = new LogoutHandler(userService);
         listGamesHandler = new ListGamesHandler(gameService);
+        createGameHandler = new CreateGameHandler(gameService);
     }
 }
