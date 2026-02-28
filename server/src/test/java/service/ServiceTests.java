@@ -311,35 +311,32 @@ public class ServiceTests {
 
     }
 
-//    @Test
-//    @Order(4)
-//    @DisplayName("Clear Success")
-//    public void testClear() {
-//        testUserDAO = new MemoryUserDAO();
-//        testAuthDAO = new MemoryAuthDAO();
-//        testGameDAO = new MemoryGameDAO();
-//        testUserService = new UserService(testUserDAO, testAuthDAO);
-//        testGameService = new GameService(testGameDAO, testAuthDAO);
-//        testAuthService = new AuthService(testAuthDAO);
-//
-//        UserData[] testUsers = {
-//                new UserData("emma", "1234", "emma.email.com"),
-//                new UserData("beans", "NOOOO", "bean.bean.com"),
-//                new UserData("Mario", "itsAMe", "mario@nintendo.com")
-//        };
-//
-//        for (UserData testUser : testUsers) {
-//            testUserDAO.createUser(testUser);
-//        }
-//
-//        ClearRequest clearRequest = new ClearRequest();
-//        testUserService.clear(clearRequest);
-//        testGameService.clear(clearRequest);
-//        testAuthService.clear(clearRequest);
-//
-//
-//
-//    }
+    @Test
+    @Order(15)
+    @DisplayName("Clear Success")
+    public void testClear() {
+        testUserDAO = new MemoryUserDAO();
+        testAuthDAO = new MemoryAuthDAO();
+        testGameDAO = new MemoryGameDAO();
+        testUserService = new UserService(testUserDAO, testAuthDAO);
+        testGameService = new GameService(testGameDAO, testAuthDAO);
+        testAuthService = new AuthService(testAuthDAO);
+
+        UserData[] testUsers = {
+                new UserData("emma", "1234", "emma.email.com"),
+                new UserData("beans", "NOOOO", "bean.bean.com"),
+                new UserData("Mario", "itsAMe", "mario@nintendo.com")
+        };
+
+        for (UserData testUser : testUsers) {
+            testUserDAO.createUser(testUser);
+        }
+
+        testUserService.clear();
+        testGameService.clear();
+        testAuthService.clear();
+
+    }
 
 
 

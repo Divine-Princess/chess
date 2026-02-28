@@ -2,7 +2,6 @@ package server.handler;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
-import model.request.ClearRequest;
 import model.result.ClearResult;
 import service.AuthService;
 import service.GameService;
@@ -22,12 +21,9 @@ public class ClearHandler implements Handler {
 
     public void handle(Context context) {
 
-        ClearRequest request = new Gson().fromJson(context.body(), ClearRequest.class);
-        ClearResult result = userService.clear(request);
-
-        result = gameService.clear(request);
-
-        result = authService.clear(request);
+        userService.clear();
+        gameService.clear();
+        ClearResult result = authService.clear();
 
         context.result(new Gson().toJson(result));
     }

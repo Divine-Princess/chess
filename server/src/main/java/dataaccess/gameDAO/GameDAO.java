@@ -6,15 +6,13 @@ import java.util.Collection;
 
 public interface GameDAO {
 
-    public void createGame(GameData gameData);
+    void createGame(GameData gameData);
 
-    public GameData getGame(int gameID);
+    GameData getGame(int gameID);
 
-    public Collection<GameData> listGames();
+    Collection<GameData> listGames();
 
-    public void updateGame(String playerColor, int gameID, String username);
+    void updateGame(String playerColor, int gameID, String username);
 
-    public void deleteGame(int gameID);
-
-    public void clear();
+    void clear();
 }

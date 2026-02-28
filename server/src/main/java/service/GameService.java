@@ -5,7 +5,6 @@ import dataaccess.authDAO.AuthDAO;
 import dataaccess.gameDAO.GameDAO;
 import model.data.AuthData;
 import model.data.GameData;
-import model.request.ClearRequest;
 import model.request.CreateGameRequest;
 import model.request.JoinGameRequest;
 import model.request.ListGamesRequest;
@@ -111,7 +110,7 @@ public class GameService {
         return new JoinGameResult();
     }
 
-    public ClearResult clear(ClearRequest clearRequest) {
+    public ClearResult clear() {
         gameDAO.clear();
         return new ClearResult();
     }

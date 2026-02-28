@@ -4,7 +4,6 @@ import model.data.GameData;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class MemoryGameDAO implements GameDAO{
 
@@ -47,10 +46,6 @@ public class MemoryGameDAO implements GameDAO{
         this.game.put(gameID, updatedGame);
     }
 
-    @Override
-    public void deleteGame(int gameID) {
-        game.remove(gameID);
-    }
     @Override
     public void clear() {
         game.clear();

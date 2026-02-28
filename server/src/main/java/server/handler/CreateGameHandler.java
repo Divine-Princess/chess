@@ -5,9 +5,8 @@ import io.javalin.http.Context;
 import model.request.CreateGameRequest;
 import model.result.CreateGameResult;
 import service.GameService;
-
 import java.util.Map;
-import java.util.Objects;
+
 
 public class CreateGameHandler implements Handler {
 

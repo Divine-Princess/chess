@@ -3,9 +3,7 @@ package server.handler;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import model.request.ListGamesRequest;
-import model.request.LogoutRequest;
 import model.result.ListGamesResult;
-import model.result.LogoutResult;
 import service.GameService;
 
 public class ListGamesHandler implements Handler{

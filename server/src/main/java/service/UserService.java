@@ -4,7 +4,6 @@ import dataaccess.authDAO.AuthDAO;
 import dataaccess.userDAO.UserDAO;
 import model.data.AuthData;
 import model.data.UserData;
-import model.request.ClearRequest;
 import model.request.LoginRequest;
 import model.request.LogoutRequest;
 import model.request.RegisterRequest;
@@ -96,7 +95,7 @@ public class UserService {
         return new LogoutResult();
     }
 
-    public ClearResult clear(ClearRequest clearRequest) {
+    public ClearResult clear() {
         userDAO.clear();
 
         return new ClearResult();
