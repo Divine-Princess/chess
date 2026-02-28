@@ -7,10 +7,13 @@ import model.data.AuthData;
 import model.data.GameData;
 import model.request.ClearRequest;
 import model.request.CreateGameRequest;
+import model.request.JoinGameRequest;
 import model.request.ListGamesRequest;
 import model.result.ClearResult;
 import model.result.CreateGameResult;
+import model.result.JoinGameResult;
 import model.result.ListGamesResult;
+import server.AlreadyTakenException;
 import server.BadRequestException;
 import server.UnauthorizedException;
 
@@ -63,6 +66,12 @@ public class GameService {
         GameData newGame = new GameData(newID, "", "", gameName, new ChessGame());
 
         return new CreateGameResult(newGame.gameID());
+    }
+
+    public JoinGameResult joinGame(JoinGameRequest joinGameRequest)
+            throws BadRequestException, UnauthorizedException, AlreadyTakenException {
+
+        return new JoinGameResult();
     }
 
     public ClearResult clear(ClearRequest clearRequest) {

@@ -207,7 +207,7 @@ public class ServiceTests {
 
         CreateGameResult testResult = testGameService.createGame(testReq);
 
-        Assertions.assertNotNull(testResult, "Expected ListGamesRequest, returned null");
+        Assertions.assertNotNull(testResult, "Expected CreateGameRequest, returned null");
     }
 
     @Test
@@ -234,6 +234,81 @@ public class ServiceTests {
         CreateGameRequest badRequest = new CreateGameRequest(authToken, null);
 
         Assertions.assertThrows(BadRequestException.class, () -> testGameService.createGame(badRequest));
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("Join Game Success")
+    public void joinGameSuccess() {
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        testUserService.register(testRegisterRequest);
+
+        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+
+        String authToken = testLoginResult.authToken();
+
+        RegisterRequest testRegisterRequest1 = new RegisterRequest("connor", "5678", "connor@email.com");
+        testUserService.register(testRegisterRequest1);
+
+        // create player 2
+        LoginRequest testLoginRequest1 = new LoginRequest("connor", "5678");
+        LoginResult testLoginResult1 = testUserService.login(testLoginRequest1);
+
+        String authToken1 = testLoginResult1.authToken();
+
+        CreateGameRequest testCreateReq = new CreateGameRequest(authToken, "beepbeep");
+
+        CreateGameResult testCreateResult = testGameService.createGame(testCreateReq);
+
+        int gameID = testCreateResult.gameID();
+
+        JoinGameRequest[] requests = {
+                new JoinGameRequest(authToken, "WHITE", gameID),
+                new JoinGameRequest(authToken1,"BLACK", gameID)
+        };
+
+        for (JoinGameRequest request : requests) {
+            JoinGameResult testResult = testGameService.joinGame(request);
+            Assertions.assertNotNull(testResult, "Expected ListGamesRequest, returned null");
+        }
+    }
+
+    @Test
+    @Order(14)
+    @DisplayName("Join Game Already Taken")
+    public void joinAlreadyTaken() {
+        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
+        testUserService.register(testRegisterRequest);
+
+        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
+        LoginResult testLoginResult = testUserService.login(testLoginRequest);
+
+        String authToken = testLoginResult.authToken();
+
+        RegisterRequest testRegisterRequest1 = new RegisterRequest("connor", "5678", "connor@email.com");
+        testUserService.register(testRegisterRequest1);
+
+        // create player 2
+        LoginRequest testLoginRequest1 = new LoginRequest("connor", "5678");
+        LoginResult testLoginResult1 = testUserService.login(testLoginRequest1);
+
+        String authToken1 = testLoginResult1.authToken();
+
+        CreateGameRequest testCreateReq = new CreateGameRequest(authToken, "beepbeep");
+
+        CreateGameResult testCreateResult = testGameService.createGame(testCreateReq);
+
+        int gameID = testCreateResult.gameID();
+
+        JoinGameRequest[] requests = {
+                new JoinGameRequest(authToken, "WHITE", gameID),
+                new JoinGameRequest(authToken1,"WHITE", gameID)
+        };
+
+        for (JoinGameRequest request : requests) {
+            Assertions.assertThrows(AlreadyTakenException.class, () -> testGameService.joinGame(request));
+        }
     }
 
 //    @Test
