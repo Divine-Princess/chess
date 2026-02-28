@@ -12,6 +12,8 @@ public interface GameDAO {
 
     public Collection<GameData> listGames();
 
+    public void updateGame(String playerColor, int gameID, String username);
+
     public void deleteGame(int gameID);
 
     public void clear();

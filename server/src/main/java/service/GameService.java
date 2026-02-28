@@ -22,6 +22,7 @@ import java.util.*;
 public class GameService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
+    private int gameID = 1;
 
     public GameService(GameDAO gameDAO, AuthDAO authDAO) {
         this.gameDAO = gameDAO;
@@ -63,13 +64,49 @@ public class GameService {
 
         int newID = generateID();
 
-        GameData newGame = new GameData(newID, "", "", gameName, new ChessGame());
+        GameData newGame = new GameData(newID, null, null, gameName, new ChessGame());
+
+        gameDAO.createGame(newGame);
 
         return new CreateGameResult(newGame.gameID());
     }
 
     public JoinGameResult joinGame(JoinGameRequest joinGameRequest)
             throws BadRequestException, UnauthorizedException, AlreadyTakenException {
+
+        String authToken = joinGameRequest.authToken();
+        String playerColor = joinGameRequest.playerColor();
+        int gameID = joinGameRequest.gameID();
+
+        AuthData authData = authDAO.getAuth(authToken);
+        GameData gameData = gameDAO.getGame(gameID);
+
+        if (authToken == null || authToken.isBlank() || authData == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        else if (playerColor == null || playerColor.isBlank()) {
+            throw new BadRequestException("Error: missing player color");
+        }
+        else if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
+            throw new BadRequestException("Error: Invalid color");
+        }
+        else if (gameID <= 0 || gameData == null) {
+            System.out.println(gameID);
+            throw new BadRequestException("Error: invalid gameID");
+        }
+
+        String currUsername = authData.username();
+        String whiteUsername = gameData.whiteUsername();
+        String blackUsername = gameData.blackUsername();
+
+        if ((playerColor.equals("WHITE") && whiteUsername != null && !currUsername.equals(whiteUsername))) {
+            throw new AlreadyTakenException("Error: White already taken");
+        }
+        else if (playerColor.equals("BLACK") && blackUsername != null && !currUsername.equals(blackUsername)) {
+            throw new AlreadyTakenException("Error: Black already taken");
+        }
+
+        gameDAO.updateGame(playerColor, gameID, currUsername);
 
         return new JoinGameResult();
     }
@@ -80,14 +117,6 @@ public class GameService {
     }
 
     private int generateID() {
-        Random rand = new Random();
-        int randID = rand.nextInt(9999) + 1;
-
-        GameData existingGame = gameDAO.getGame(randID);
-
-        if (existingGame != null) {
-            generateID();
-        }
-        return randID;
+        return gameID++;
     }
 }

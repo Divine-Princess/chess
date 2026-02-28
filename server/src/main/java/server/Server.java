@@ -28,6 +28,7 @@ public class Server {
     Handler logoutHandler;
     Handler listGamesHandler;
     Handler createGameHandler;
+    Handler joinGameHandler;
 
     private final Javalin javalin;
 
@@ -39,6 +40,7 @@ public class Server {
                          .post("/session", context -> loginHandler.handle(context))
                          .post("/game", context -> createGameHandler.handle(context))
                          .get("/game", context -> listGamesHandler.handle(context))
+                         .put("/game", context -> joinGameHandler.handle(context))
                          .delete("/db", context -> clearHandler.handle(context))
                          .delete("/session", context -> logoutHandler.handle(context))
                          .exception(Exception.class, this::exceptionHandler);
@@ -78,5 +80,6 @@ public class Server {
         logoutHandler = new LogoutHandler(userService);
         listGamesHandler = new ListGamesHandler(gameService);
         createGameHandler = new CreateGameHandler(gameService);
+        joinGameHandler = new JoinGameHandler(gameService);
     }
 }

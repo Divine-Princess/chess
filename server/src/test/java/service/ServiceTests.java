@@ -248,16 +248,16 @@ public class ServiceTests {
 
         String authToken = testLoginResult.authToken();
 
+        // create player 2
         RegisterRequest testRegisterRequest1 = new RegisterRequest("connor", "5678", "connor@email.com");
         testUserService.register(testRegisterRequest1);
 
-        // create player 2
         LoginRequest testLoginRequest1 = new LoginRequest("connor", "5678");
         LoginResult testLoginResult1 = testUserService.login(testLoginRequest1);
 
         String authToken1 = testLoginResult1.authToken();
 
-        CreateGameRequest testCreateReq = new CreateGameRequest(authToken, "beepbeep");
+        CreateGameRequest testCreateReq = new CreateGameRequest(authToken, "1.0");
 
         CreateGameResult testCreateResult = testGameService.createGame(testCreateReq);
 
@@ -301,14 +301,14 @@ public class ServiceTests {
 
         int gameID = testCreateResult.gameID();
 
-        JoinGameRequest[] requests = {
-                new JoinGameRequest(authToken, "WHITE", gameID),
-                new JoinGameRequest(authToken1,"WHITE", gameID)
-        };
+        JoinGameRequest request = new JoinGameRequest(authToken, "WHITE", gameID);
 
-        for (JoinGameRequest request : requests) {
-            Assertions.assertThrows(AlreadyTakenException.class, () -> testGameService.joinGame(request));
-        }
+        testGameService.joinGame(request);
+
+        JoinGameRequest request1 = new JoinGameRequest(authToken1,"WHITE", gameID);
+
+        Assertions.assertThrows(AlreadyTakenException.class, () -> testGameService.joinGame(request1));
+
     }
 
 //    @Test
