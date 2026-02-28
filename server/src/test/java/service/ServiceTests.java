@@ -1,8 +1,8 @@
 package service;
 
-import dataaccess.authDAO.MemoryAuthDAO;
-import dataaccess.gameDAO.MemoryGameDAO;
-import dataaccess.userDAO.MemoryUserDAO;
+import dataaccess.authdao.MemoryAuthDAO;
+import dataaccess.gamedao.MemoryGameDAO;
+import dataaccess.userdao.MemoryUserDAO;
 import model.data.UserData;
 import model.request.*;
 import model.result.*;
@@ -30,12 +30,10 @@ public class ServiceTests {
         testAuthService = new AuthService(testAuthDAO);
     }
 
-    // Register Success:
     @Test
     @Order(1)
     @DisplayName("Register Success")
     public void registerSuccess() {
-        // empty request
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         RegisterResult testRegisterResult = testUserService.register(testRegisterRequest);
 
@@ -44,12 +42,10 @@ public class ServiceTests {
         Assertions.assertFalse(testRegisterResult.authToken().isEmpty(), "AuthToken is empty!");
     }
 
-    // Register Error: BadRequestException:
     @Test
     @Order(2)
     @DisplayName("Register Bad Request")
     public void registerBadRequest() {
-        // empty request
         RegisterRequest[] badRequests = {
                 new RegisterRequest("", "", ""),
                 new RegisterRequest("emma", "1234", ""),
@@ -63,7 +59,6 @@ public class ServiceTests {
 
     }
 
-    // Register Error: AlreadyTakenException:
     @Test
     @Order(3)
     @DisplayName("Register Already Taken")
@@ -94,7 +89,6 @@ public class ServiceTests {
     @Order(4)
     @DisplayName("Login Success")
     public void loginSuccess() {
-        // empty request
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -110,7 +104,6 @@ public class ServiceTests {
     @Order(5)
     @DisplayName("Login Bad Request")
     public void loginBadRequest() {
-        // empty request
         LoginRequest[] badRequests = {
                 new LoginRequest("", ""),
                 new LoginRequest("emma",""),
@@ -128,7 +121,6 @@ public class ServiceTests {
     @Order(6)
     @DisplayName("Logout Success")
     public void logoutSuccess() {
-        // empty request
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -178,14 +170,6 @@ public class ServiceTests {
     @Order(9)
     @DisplayName("List Games Unauthorized")
     public void listGamesUnauthorized() {
-//        RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
-//        testUserService.register(testRegisterRequest);
-//
-//        LoginRequest testLoginRequest = new LoginRequest("emma", "1234");
-//        LoginResult testLoginResult = testUserService.login(testLoginRequest);
-//
-//        String authToken = testLoginResult.authToken();
-
         ListGamesRequest testListReq = new ListGamesRequest("");
 
         Assertions.assertThrows(UnauthorizedException.class, () -> testGameService.listGames(testListReq));

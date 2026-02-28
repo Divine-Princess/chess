@@ -1,6 +1,6 @@
 package service;
 
-import dataaccess.authDAO.AuthDAO;
+import dataaccess.authdao.AuthDAO;
 import model.result.ClearResult;
 
 public class AuthService {

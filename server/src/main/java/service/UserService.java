@@ -1,7 +1,7 @@
 package service;
 
-import dataaccess.authDAO.AuthDAO;
-import dataaccess.userDAO.UserDAO;
+import dataaccess.authdao.AuthDAO;
+import dataaccess.userdao.UserDAO;
 import model.data.AuthData;
 import model.data.UserData;
 import model.request.LoginRequest;
