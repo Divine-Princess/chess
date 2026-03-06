@@ -68,6 +68,12 @@ public class Server {
     }
 
     private void initializeServer() {
+        // try making DataBase Manager
+        // if works
+            // create connection to pass to DAOs
+            // make SQL DAOS
+        // otherwise, make Memory DAOS
+
         userDAO = new MemoryUserDAO();
         authDAO = new MemoryAuthDAO();
         gameDAO = new MemoryGameDAO();
@@ -81,5 +87,6 @@ public class Server {
         listGamesHandler = new ListGamesHandler(gameService);
         createGameHandler = new CreateGameHandler(gameService);
         joinGameHandler = new JoinGameHandler(gameService);
+
     }
 }

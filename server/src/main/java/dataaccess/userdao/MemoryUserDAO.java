@@ -14,7 +14,6 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void createUser(UserData userData) {
-        System.out.println("INSERT: " + userData.username());
         user.put(userData.username(), userData);
     }
 
