@@ -1,6 +1,7 @@
 package server.handler;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import model.request.RegisterRequest;
 import model.result.RegisterResult;
@@ -14,7 +15,7 @@ public class RegisterHandler implements Handler {
         this.userService = userService;
     }
 
-    public void handle(Context context) {
+    public void handle(Context context) throws DataAccessException {
 
         RegisterRequest request = new Gson().fromJson(context.body(), RegisterRequest.class);
         RegisterResult result = userService.register(request);

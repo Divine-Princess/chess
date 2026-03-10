@@ -1,6 +1,7 @@
 package server.handler;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import model.result.ClearResult;
 import service.AuthService;
@@ -19,7 +20,7 @@ public class ClearHandler implements Handler {
         this.authService = authService;
     }
 
-    public void handle(Context context) {
+    public void handle(Context context) throws DataAccessException {
 
         userService.clear();
         gameService.clear();

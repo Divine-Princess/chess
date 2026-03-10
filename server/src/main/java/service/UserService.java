@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.authdao.AuthDAO;
 import dataaccess.userdao.UserDAO;
 import model.data.AuthData;
@@ -11,10 +12,12 @@ import model.result.ClearResult;
 import model.result.LoginResult;
 import model.result.LogoutResult;
 import model.result.RegisterResult;
+import org.mindrot.jbcrypt.BCrypt;
 import server.AlreadyTakenException;
 import server.BadRequestException;
 import server.UnauthorizedException;
 
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -28,7 +31,7 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
-    public RegisterResult register(RegisterRequest registerRequest) throws AlreadyTakenException, BadRequestException {
+    public RegisterResult register(RegisterRequest registerRequest) throws AlreadyTakenException, BadRequestException, DataAccessException {
         String username = registerRequest.username();
         String password = registerRequest.password();
         String email = registerRequest.email();
@@ -46,7 +49,9 @@ public class UserService {
             throw new AlreadyTakenException("Error: username already taken");
         }
 
-        UserData newUser = new UserData(username, password, email);
+        String hashedPassword = hashPassword(password);
+
+        UserData newUser = new UserData(username, hashedPassword, email);
 
         String authToken = createToken(newUser);
 
@@ -55,7 +60,7 @@ public class UserService {
         return new RegisterResult(registerRequest.username(), authToken);
     }
 
-    public LoginResult login(LoginRequest loginRequest) throws BadRequestException, UnauthorizedException {
+    public LoginResult login(LoginRequest loginRequest) throws BadRequestException, UnauthorizedException, DataAccessException {
         String username = loginRequest.username();
         String password = loginRequest.password();
 
@@ -95,7 +100,7 @@ public class UserService {
         return new LogoutResult();
     }
 
-    public ClearResult clear() {
+    public ClearResult clear() throws DataAccessException {
         userDAO.clear();
 
         return new ClearResult();
@@ -112,6 +117,10 @@ public class UserService {
         authDAO.createAuth(newAuthData);
 
         return authToken;
+    }
+
+    private String hashPassword(String clearTextPassword) {
+        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
     }
 
     @Override

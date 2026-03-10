@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.authdao.MemoryAuthDAO;
 import dataaccess.gamedao.MemoryGameDAO;
 import dataaccess.userdao.MemoryUserDAO;
@@ -33,7 +34,7 @@ public class ServiceTests {
     @Test
     @Order(1)
     @DisplayName("Register Success")
-    public void registerSuccess() {
+    public void registerSuccess() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         RegisterResult testRegisterResult = testUserService.register(testRegisterRequest);
 
@@ -88,7 +89,7 @@ public class ServiceTests {
     @Test
     @Order(4)
     @DisplayName("Login Success")
-    public void loginSuccess() {
+    public void loginSuccess() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -120,7 +121,7 @@ public class ServiceTests {
     @Test
     @Order(6)
     @DisplayName("Logout Success")
-    public void logoutSuccess() {
+    public void logoutSuccess() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -149,7 +150,7 @@ public class ServiceTests {
     @Test
     @Order(8)
     @DisplayName("List Games Success")
-    public void listGamesSuccess() {
+    public void listGamesSuccess() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -178,7 +179,7 @@ public class ServiceTests {
     @Test
     @Order(10)
     @DisplayName("Create Game Success")
-    public void createGameSuccess() {
+    public void createGameSuccess() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -206,7 +207,7 @@ public class ServiceTests {
     @Test
     @Order(12)
     @DisplayName("Create Game Bad Request")
-    public void createGameBadRequest() {
+    public void createGameBadRequest() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -223,7 +224,7 @@ public class ServiceTests {
     @Test
     @Order(13)
     @DisplayName("Join Game Success")
-    public void joinGameSuccess() {
+    public void joinGameSuccess() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -261,7 +262,7 @@ public class ServiceTests {
     @Test
     @Order(14)
     @DisplayName("Join Game Already Taken")
-    public void joinAlreadyTaken() {
+    public void joinAlreadyTaken() throws DataAccessException {
         RegisterRequest testRegisterRequest = new RegisterRequest("emma", "1234", "emma@email.com");
         testUserService.register(testRegisterRequest);
 
@@ -298,7 +299,7 @@ public class ServiceTests {
     @Test
     @Order(15)
     @DisplayName("Clear Success")
-    public void testClear() {
+    public void testClear() throws DataAccessException {
         testUserDAO = new MemoryUserDAO();
         testAuthDAO = new MemoryAuthDAO();
         testGameDAO = new MemoryGameDAO();

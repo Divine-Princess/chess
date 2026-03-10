@@ -1,6 +1,7 @@
 package server.handler;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import model.request.LoginRequest;
 import model.result.LoginResult;
@@ -14,7 +15,7 @@ public class LoginHandler implements Handler {
         this.userService = userService;
     }
 
-    public void handle(Context context) {
+    public void handle(Context context) throws DataAccessException {
 
         LoginRequest request = new Gson().fromJson(context.body(), LoginRequest.class);
         LoginResult result = userService.login(request);

@@ -1,11 +1,15 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseConfigurator;
+import dataaccess.DatabaseManager;
 import dataaccess.authdao.AuthDAO;
 import dataaccess.authdao.MemoryAuthDAO;
 import dataaccess.gamedao.GameDAO;
 import dataaccess.gamedao.MemoryGameDAO;
 import dataaccess.userdao.MemoryUserDAO;
+import dataaccess.userdao.MySQLUserDAO;
 import dataaccess.userdao.UserDAO;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -13,6 +17,9 @@ import server.handler.*;
 import service.GameService;
 import service.UserService;
 import service.AuthService;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class Server {
@@ -29,6 +36,7 @@ public class Server {
     Handler listGamesHandler;
     Handler createGameHandler;
     Handler joinGameHandler;
+    DatabaseConfigurator databaseConfigurator;
 
     private final Javalin javalin;
 
@@ -69,14 +77,19 @@ public class Server {
 
     private void initializeServer() {
         // try making DataBase Manager
+        try {
+            databaseConfigurator = new DatabaseConfigurator();
+            userDAO = new MySQLUserDAO(databaseConfigurator);
+
+        } catch (DataAccessException e) {
+            userDAO = new MemoryUserDAO();
+            authDAO = new MemoryAuthDAO();
+            gameDAO = new MemoryGameDAO();
+        }
         // if works
             // create connection to pass to DAOs
             // make SQL DAOS
         // otherwise, make Memory DAOS
-
-        userDAO = new MemoryUserDAO();
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
         userService = new UserService(userDAO,authDAO);
         gameService = new GameService(gameDAO,authDAO);
         authService = new AuthService(authDAO);
