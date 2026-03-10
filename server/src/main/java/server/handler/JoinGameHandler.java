@@ -1,6 +1,7 @@
 package server.handler;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import model.request.JoinGameRequest;
 import model.result.JoinGameResult;
@@ -15,7 +16,7 @@ public class JoinGameHandler implements Handler {
     public JoinGameHandler(GameService gameService) { this.gameService = gameService; }
 
     @Override
-    public void handle(Context context) {
+    public void handle(Context context) throws DataAccessException {
 
         String authToken = context.header("Authorization");
         var gameMap = new Gson().fromJson(context.body(), Map.class);
@@ -41,8 +42,6 @@ public class JoinGameHandler implements Handler {
 
         System.out.println("PlayerColor: " + playerColor);
         request = new JoinGameRequest(authToken, playerColor, gameID);
-
-
 
         JoinGameResult result = gameService.joinGame(request);
 

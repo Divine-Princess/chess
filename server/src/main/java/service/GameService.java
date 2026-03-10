@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import dataaccess.DataAccessException;
 import dataaccess.authdao.AuthDAO;
 import dataaccess.gamedao.GameDAO;
 import model.data.AuthData;
@@ -28,7 +29,7 @@ public class GameService {
         this.authDAO = authDAO;
     }
 
-    public ListGamesResult listGames(ListGamesRequest listGamesReq) {
+    public ListGamesResult listGames(ListGamesRequest listGamesReq) throws DataAccessException {
         String authToken = listGamesReq.authToken();
 
         AuthData existingToken = authDAO.getAuth(authToken);
@@ -42,7 +43,7 @@ public class GameService {
         return new ListGamesResult(gameDataList);
     }
 
-    public CreateGameResult createGame(CreateGameRequest createGameReq) throws BadRequestException, UnauthorizedException {
+    public CreateGameResult createGame(CreateGameRequest createGameReq) throws BadRequestException, UnauthorizedException, DataAccessException {
         String authToken = createGameReq.authToken();
         String gameName = createGameReq.gameName();
         System.out.println(authToken);
@@ -71,7 +72,8 @@ public class GameService {
     }
 
     public JoinGameResult joinGame(JoinGameRequest joinGameRequest)
-            throws BadRequestException, UnauthorizedException, AlreadyTakenException {
+            throws BadRequestException, UnauthorizedException,
+            AlreadyTakenException, DataAccessException {
 
         String authToken = joinGameRequest.authToken();
         String playerColor = joinGameRequest.playerColor();

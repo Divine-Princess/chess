@@ -4,6 +4,7 @@ import dataaccess.authdao.AuthDAO;
 import dataaccess.authdao.MySQLAuthDAO;
 import dataaccess.userdao.MySQLUserDAO;
 import dataaccess.userdao.UserDAO;
+import model.data.AuthData;
 import model.data.UserData;
 import org.junit.jupiter.api.*;
 
@@ -19,6 +20,7 @@ public class DataAccessTests {
         userDAO = new MySQLUserDAO(db);
         authDAO = new MySQLAuthDAO(db);
         userDAO.clear();
+        authDAO.clear();
     }
 
     @Test
@@ -97,6 +99,103 @@ public class DataAccessTests {
         Assertions.assertNull(userDAO.getUser("emma"));
         Assertions.assertNull(userDAO.getUser("beans"));
         Assertions.assertNull(userDAO.getUser("Mario"));
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("AUTH: Get Success")
+    public void getAuthSuccess() throws DataAccessException {
+
+        AuthData authData = new AuthData("authToken", "emma");
+
+        authDAO.createAuth(authData);
+
+        Assertions.assertDoesNotThrow(() -> authDAO.getAuth("authToken"));
+        AuthData newAuthData = authDAO.getAuth("authToken");
+        Assertions.assertEquals(authData, newAuthData);
+        Assertions.assertEquals(authData.authToken(), newAuthData.authToken());
+        Assertions.assertEquals(authData.username(), newAuthData.username());
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("AUTH: Get Failure")
+    public void getAuthFailure() throws DataAccessException {
+        Assertions.assertNull(authDAO.getAuth("authToken"), "Expected null, returned other");
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("AUTH: Create Success")
+    public void createAuthSuccess() throws DataAccessException {
+        AuthData authData = new AuthData("authToken", "emma");
+
+        authDAO.createAuth(authData);
+
+        Assertions.assertDoesNotThrow(() -> authDAO.getAuth("authToken"));
+        AuthData newAuthData = authDAO.getAuth("authToken");
+        Assertions.assertNotNull(newAuthData);
+        Assertions.assertEquals(authData, newAuthData);
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("AUTH: Create Failure - Duplicate Auth")
+    public void createAuthFailureDuplicateAuth() throws DataAccessException {
+        AuthData authData = new AuthData("authToken", "emma");
+
+        authDAO.createAuth(authData);
+
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.createAuth(authData));
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("AUTH: Create Failure - Null Auth")
+    public void createAuthFailureNullAuth() throws DataAccessException {
+        AuthData authData = new AuthData("authToken", null);
+        Assertions.assertThrows(DataAccessException.class, () -> authDAO.createAuth(authData));
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("AUTH: Clear Success")
+    public void authClearSuccess() throws DataAccessException {
+
+        AuthData[] authDatas = {
+                new AuthData("authToken", "emma"),
+                new AuthData("authToken1", "beans"),
+                new AuthData("authToken2", "Mario"),
+        };
+        for (AuthData authData : authDatas) {
+            authDAO.createAuth(authData);
+        }
+
+        authDAO.clear();
+
+        Assertions.assertNull(authDAO.getAuth("authToken"));
+        Assertions.assertNull(authDAO.getAuth("authToken1"));
+        Assertions.assertNull(authDAO.getAuth("authToken2"));
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("AUTH: Delete Auth Success")
+    public void authDeleteAuthSuccess() throws DataAccessException {
+
+        AuthData[] authDatas = {
+                new AuthData("authToken", "emma"),
+                new AuthData("authToken1", "beans"),
+                new AuthData("authToken2", "Mario"),
+        };
+        for (AuthData authData : authDatas) {
+            authDAO.createAuth(authData);
+            authDAO.deleteAuth(authData.authToken());
+        }
+
+        Assertions.assertNull(authDAO.getAuth("authToken"));
+        Assertions.assertNull(authDAO.getAuth("authToken1"));
+        Assertions.assertNull(authDAO.getAuth("authToken2"));
     }
 
 }

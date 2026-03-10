@@ -1,6 +1,7 @@
 package server.handler;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import model.request.ListGamesRequest;
 import model.result.ListGamesResult;
@@ -13,7 +14,7 @@ public class ListGamesHandler implements Handler{
     public ListGamesHandler(GameService gameService) { this.gameService = gameService; }
 
     @Override
-    public void handle(Context context) {
+    public void handle(Context context) throws DataAccessException {
         String authToken = context.header("Authorization");
         ListGamesRequest request = new ListGamesRequest(authToken);
 

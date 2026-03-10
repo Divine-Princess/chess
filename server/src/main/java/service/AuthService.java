@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.authdao.AuthDAO;
 import model.result.ClearResult;
 
@@ -10,7 +11,7 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
-    public ClearResult clear() {
+    public ClearResult clear() throws DataAccessException {
         authDAO.clear();
         return new ClearResult();
     }

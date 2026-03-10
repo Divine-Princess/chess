@@ -16,9 +16,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import server.AlreadyTakenException;
 import server.BadRequestException;
 import server.UnauthorizedException;
-
-import java.sql.SQLException;
-import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
@@ -86,7 +83,7 @@ public class UserService {
         return new LoginResult(username, authToken);
     }
 
-    public LogoutResult logout(LogoutRequest logoutRequest) throws UnauthorizedException {
+    public LogoutResult logout(LogoutRequest logoutRequest) throws UnauthorizedException, DataAccessException {
         String authToken = logoutRequest.authToken();
 
         AuthData existingToken = authDAO.getAuth(authToken);
@@ -110,7 +107,7 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    private String createToken(UserData user) {
+    private String createToken(UserData user) throws DataAccessException {
         String authToken = generateToken();
         AuthData newAuthData = new AuthData(authToken, user.username());
 
