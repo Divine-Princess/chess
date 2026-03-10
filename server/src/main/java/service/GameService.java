@@ -46,8 +46,6 @@ public class GameService {
     public CreateGameResult createGame(CreateGameRequest createGameReq) throws BadRequestException, UnauthorizedException, DataAccessException {
         String authToken = createGameReq.authToken();
         String gameName = createGameReq.gameName();
-        System.out.println(authToken);
-        System.out.println(gameName);
 
         if (authToken == null || authToken.isBlank()) {
             throw new UnauthorizedException("Error: unauthorized");
@@ -112,7 +110,7 @@ public class GameService {
         return new JoinGameResult();
     }
 
-    public ClearResult clear() {
+    public ClearResult clear() throws DataAccessException {
         gameDAO.clear();
         return new ClearResult();
     }

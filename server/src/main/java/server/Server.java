@@ -3,7 +3,6 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseConfigurator;
-import dataaccess.DatabaseManager;
 import dataaccess.authdao.AuthDAO;
 import dataaccess.authdao.MemoryAuthDAO;
 import dataaccess.gamedao.GameDAO;
@@ -17,9 +16,6 @@ import server.handler.*;
 import service.GameService;
 import service.UserService;
 import service.AuthService;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Map;
 
 public class Server {

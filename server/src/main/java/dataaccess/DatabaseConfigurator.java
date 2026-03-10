@@ -24,7 +24,7 @@ public class DatabaseConfigurator {
             """,
                     """
             CREATE TABLE IF NOT EXISTS  games (
-              gameID int PRIMARY KEY AUTO_INCREMENT,
+              gameID int PRIMARY KEY,
               whiteUsername VARCHAR(255),
               blackUsername VARCHAR(255),
               gameName VARCHAR(255) NOT NULL,
