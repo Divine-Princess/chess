@@ -77,7 +77,7 @@ public class UserService {
             throw new UnauthorizedException("Error: username or password is incorrect");
         }
 
-        if (!Objects.equals(password, user.password())) {
+        if (!verifyUser(user, password)) {
             throw new UnauthorizedException("Error: username or password is incorrect");
         }
 
@@ -121,6 +121,13 @@ public class UserService {
 
     private String hashPassword(String clearTextPassword) {
         return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
+    }
+
+    boolean verifyUser(UserData existingUser, String clearTextPassword) {
+
+        String hashExistingPassword = existingUser.password();
+
+        return BCrypt.checkpw(clearTextPassword, hashExistingPassword);
     }
 
     @Override

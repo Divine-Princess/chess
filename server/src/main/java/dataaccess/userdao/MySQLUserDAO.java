@@ -1,13 +1,8 @@
 package dataaccess.userdao;
 
-import com.mysql.cj.x.protobuf.MysqlxPrepare;
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseConfigurator;
-import dataaccess.DatabaseManager;
 import model.data.UserData;
-
-import javax.xml.crypto.Data;
-import javax.xml.transform.Result;
 import java.sql.*;
 
 public class MySQLUserDAO implements UserDAO{
@@ -61,7 +56,7 @@ public class MySQLUserDAO implements UserDAO{
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to clear data");
+            throw new DataAccessException("Error: Failed to clear user data");
         }
     }
 }
