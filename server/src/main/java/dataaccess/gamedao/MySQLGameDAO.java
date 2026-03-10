@@ -7,6 +7,7 @@ import dataaccess.DatabaseConfigurator;
 import model.data.GameData;
 import model.data.UserData;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,20 +77,46 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
-        List gameList = new ArrayList();
+        Collection<GameData> gameList = new ArrayList<>();
 
         try (Connection conn = db.setupConnection()) {
-            var statement = "SELECT "
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int existingGameID = rs.getInt("gameID");
+                        String existingWhite = rs.getString("whiteUsername");
+                        String existingBlack = rs.getString("blackUsername");
+                        String existingName = rs.getString("gameName");
+                        String gameJson = rs.getString("game");
+
+                        ChessGame existingGame = deserializeJson(gameJson);
+                        gameList.add(new GameData(existingGameID, existingWhite,
+                                existingBlack, existingName, existingGame));
+                    }
+                }
+            }
 
         } catch (Exception e) {
             throw new DataAccessException("Error: Unable to read game data");
         }
 
-        return List.of();
+        return gameList;
     }
 
     @Override
-    public void updateGame(String playerColor, int gameID, String username) {
+    public void updateGame(String playerColor, int gameID, String username) throws DataAccessException {
+        GameData game = getGame(gameID);
+        String whiteUsername = game.whiteUsername();
+        String blackUsername = game.blackUsername();
+
+        if (playerColor.equals("WHITE")) {
+            whiteUsername = username;
+        }
+        else if (playerColor.equals("BLACK")) {
+            blackUsername = username;
+        }
+
 
     }
 

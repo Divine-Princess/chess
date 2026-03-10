@@ -12,6 +12,9 @@ import model.data.GameData;
 import model.data.UserData;
 import org.junit.jupiter.api.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 
 public class DataAccessTests {
 
@@ -48,7 +51,7 @@ public class DataAccessTests {
 
     @Test
     @Order(2)
-    @DisplayName("USER: Get Failure")
+    @DisplayName("USER: Get Null")
     public void getUserFailure() throws DataAccessException {
         Assertions.assertNull(userDAO.getUser("emma"), "Expected null, returned other");
     }
@@ -126,8 +129,8 @@ public class DataAccessTests {
 
     @Test
     @Order(8)
-    @DisplayName("AUTH: Get Failure")
-    public void getAuthFailure() throws DataAccessException {
+    @DisplayName("AUTH: Get Null")
+    public void getAuthNull() throws DataAccessException {
         Assertions.assertNull(authDAO.getAuth("authToken"), "Expected null, returned other");
     }
 
@@ -223,8 +226,8 @@ public class DataAccessTests {
 
     @Test
     @Order(15)
-    @DisplayName("GAME: Create Failure - Duplicate ID")
-    public void createGameFailureDuplicateID() throws DataAccessException {
+    @DisplayName("GAME: Create Failure - Duplicate")
+    public void createGameFailureDuplicate() throws DataAccessException {
         GameData gameData = new GameData(1, null,
                 null, "test", new ChessGame());
 
@@ -254,5 +257,49 @@ public class DataAccessTests {
         Assertions.assertEquals(gameData.game(), newGameData.game());
     }
 
+    @Test
+    @Order(17)
+    @DisplayName("GAME: Get Null")
+    public void getGameNull() throws DataAccessException {
+        Assertions.assertNull(gameDAO.getGame(10), "Expected null, returned other");
+    }
 
+    @Test
+    @Order(18)
+    @DisplayName("GAME: List Games Success")
+    public void listGamesSuccess() throws DataAccessException {
+        Collection<GameData> gameList = new ArrayList<>();
+
+        GameData[] gameDatas = {
+                new GameData(1, "peanut butter",
+                        "jelly", "test", new ChessGame()),
+                new GameData(2, "peanut butter",
+                        "jelly", "test2", new ChessGame()),
+                new GameData(3, "peanut butter",
+                        "jelly", "test3", new ChessGame()),
+                new GameData(4, "peanut butter",
+                        "jelly", "test4", new ChessGame()),
+        };
+
+        for (GameData gameData : gameDatas) {
+            gameList.add(gameData);
+            gameDAO.createGame(gameData);
+        }
+
+        Collection<GameData> newGameList = gameDAO.listGames();
+
+        Assertions.assertIterableEquals(gameList, newGameList);
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("GAME: List Games Empty")
+    public void listGamesEmpty() throws DataAccessException {
+
+        Collection<GameData> gameList = new ArrayList<>();
+
+        Collection<GameData> newGameList = gameDAO.listGames();
+
+        Assertions.assertIterableEquals(gameList, newGameList);
+    }
 }
