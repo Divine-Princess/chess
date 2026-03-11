@@ -35,7 +35,7 @@ public class GameService {
         AuthData existingToken = authDAO.getAuth(authToken);
 
         if (existingToken == null) {
-            throw new UnauthorizedException("Error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         }
 
         Collection<GameData> gameDataList = gameDAO.listGames();
@@ -48,16 +48,16 @@ public class GameService {
         String gameName = createGameReq.gameName();
 
         if (authToken == null || authToken.isBlank()) {
-            throw new UnauthorizedException("Error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         }
         if (gameName == null) {
-            throw new BadRequestException("Error: Game name missing");
+            throw new BadRequestException("Game name missing");
         }
 
         AuthData existingAuth = authDAO.getAuth(authToken);
 
         if (existingAuth == null) {
-            throw new UnauthorizedException("Error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         }
 
         int newID = generateID();
@@ -81,17 +81,17 @@ public class GameService {
         GameData gameData = gameDAO.getGame(gameID);
 
         if (authToken == null || authToken.isBlank() || authData == null) {
-            throw new UnauthorizedException("Error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         }
         else if (playerColor == null || playerColor.isBlank()) {
-            throw new BadRequestException("Error: missing player color");
+            throw new BadRequestException("missing player color");
         }
         else if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
-            throw new BadRequestException("Error: Invalid color");
+            throw new BadRequestException("Invalid color");
         }
         else if (gameID <= 0 || gameData == null) {
             System.out.println(gameID);
-            throw new BadRequestException("Error: invalid gameID");
+            throw new BadRequestException("invalid gameID");
         }
 
         String currUsername = authData.username();
@@ -99,10 +99,10 @@ public class GameService {
         String blackUsername = gameData.blackUsername();
 
         if ((playerColor.equals("WHITE") && whiteUsername != null && !currUsername.equals(whiteUsername))) {
-            throw new AlreadyTakenException("Error: White already taken");
+            throw new AlreadyTakenException("White already taken");
         }
         else if (playerColor.equals("BLACK") && blackUsername != null && !currUsername.equals(blackUsername)) {
-            throw new AlreadyTakenException("Error: Black already taken");
+            throw new AlreadyTakenException("Black already taken");
         }
 
         gameDAO.updateGame(playerColor, gameID, currUsername);

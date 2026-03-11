@@ -62,7 +62,7 @@ public class Server {
     }
 
     private void exceptionHandler(Exception e, Context context) {
-        var body = new Gson().toJson(Map.of("message", String.format(e.getMessage())));
+        var body = new Gson().toJson(Map.of("message", "Error: " + String.format(e.getMessage())));
 
         switch (e) {
             case BadRequestException badRequestException -> context.status(400);

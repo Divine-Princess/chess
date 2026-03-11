@@ -26,7 +26,7 @@ public class MySQLAuthDAO implements AuthDAO {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to create authentication");
+            throw new DataAccessException("Failed to create authentication");
         }
     }
 
@@ -45,7 +45,7 @@ public class MySQLAuthDAO implements AuthDAO {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException("Error: Unable to read auth data");
+            throw new DataAccessException("Unable to read auth data");
         }
         return null;
     }
@@ -59,7 +59,7 @@ public class MySQLAuthDAO implements AuthDAO {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to clear auth data");
+            throw new DataAccessException("Failed to clear auth data");
         }
 
     }
@@ -72,7 +72,7 @@ public class MySQLAuthDAO implements AuthDAO {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to clear auth data");
+            throw new DataAccessException("Failed to clear auth data");
         }
     }
 }

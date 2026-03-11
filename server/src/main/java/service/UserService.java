@@ -34,16 +34,16 @@ public class UserService {
         String email = registerRequest.email();
 
         if (username == null || password == null || email == null) {
-            throw new BadRequestException("Error: Missing username, password, or email");
+            throw new BadRequestException("Missing username, password, or email");
         }
         else if (username.isBlank() || password.isBlank() || email.isBlank()) {
-            throw new BadRequestException("Error: Username, password, or email cannot be blank");
+            throw new BadRequestException("Username, password, or email cannot be blank");
         }
 
         UserData existingUser = userDAO.getUser(username);
 
         if (existingUser != null) {
-            throw new AlreadyTakenException("Error: username already taken");
+            throw new AlreadyTakenException("username already taken");
         }
 
         String hashedPassword = hashPassword(password);
@@ -62,20 +62,20 @@ public class UserService {
         String password = loginRequest.password();
 
         if (username == null || password == null) {
-            throw new BadRequestException("Error: Missing username or password");
+            throw new BadRequestException("Missing username or password");
         }
         else if (username.isBlank() || password.isBlank()) {
-            throw new BadRequestException("Error: Missing username or password");
+            throw new BadRequestException("Missing username or password");
         }
 
         UserData user = userDAO.getUser(username);
 
         if (user == null) {
-            throw new UnauthorizedException("Error: username or password is incorrect");
+            throw new UnauthorizedException("username or password is incorrect");
         }
 
         if (!verifyUser(user, password)) {
-            throw new UnauthorizedException("Error: username or password is incorrect");
+            throw new UnauthorizedException("username or password is incorrect");
         }
 
         String authToken = createToken(user);
@@ -89,7 +89,7 @@ public class UserService {
         AuthData existingToken = authDAO.getAuth(authToken);
 
         if (existingToken == null) {
-            throw new UnauthorizedException("Error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         }
 
         authDAO.deleteAuth(authToken);

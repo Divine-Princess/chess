@@ -36,7 +36,7 @@ public class MySQLGameDAO implements GameDAO {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to create game");
+            throw new DataAccessException("Failed to create game");
         }
     }
 
@@ -45,9 +45,7 @@ public class MySQLGameDAO implements GameDAO {
         try (Connection conn = db.setupConnection()) {
             var statement =
              """
-             SELECT gameID, whiteUsername, blackUsername, gameName, game
-             FROM games 
-             where gameID=?
+             SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games where gameID=?
              """;
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
@@ -66,7 +64,7 @@ public class MySQLGameDAO implements GameDAO {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException("Error: Unable to read game data");
+            throw new DataAccessException("Unable to read game data");
         }
         return null;
     }
@@ -94,7 +92,7 @@ public class MySQLGameDAO implements GameDAO {
             }
 
         } catch (Exception e) {
-            throw new DataAccessException("Error: Unable to read game data");
+            throw new DataAccessException("Unable to read game data");
         }
 
         return gameList;
@@ -104,7 +102,7 @@ public class MySQLGameDAO implements GameDAO {
     public void updateGame(String playerColor, int gameID, String username) throws DataAccessException {
         GameData game = getGame(gameID);
         if (game == null) {
-            throw new DataAccessException("Error: GameID not found");
+            throw new DataAccessException("GameID not found");
         }
         var statement = "";
 
@@ -139,7 +137,7 @@ public class MySQLGameDAO implements GameDAO {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to update game");
+            throw new DataAccessException("Failed to update game");
         }
 
     }
@@ -152,7 +150,7 @@ public class MySQLGameDAO implements GameDAO {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to clear game data");
+            throw new DataAccessException("Failed to clear game data");
         }
     }
 

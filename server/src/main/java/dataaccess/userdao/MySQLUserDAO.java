@@ -23,7 +23,7 @@ public class MySQLUserDAO implements UserDAO{
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to create user");
+            throw new DataAccessException("Failed to create user");
         }
     }
 
@@ -43,7 +43,7 @@ public class MySQLUserDAO implements UserDAO{
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException("Error: Unable to read user data");
+            throw new DataAccessException("Unable to read user data");
         }
         return null;
     }
@@ -56,7 +56,7 @@ public class MySQLUserDAO implements UserDAO{
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error: Failed to clear user data");
+            throw new DataAccessException("Failed to clear user data");
         }
     }
 }
