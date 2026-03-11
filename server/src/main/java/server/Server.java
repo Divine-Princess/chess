@@ -5,8 +5,10 @@ import dataaccess.DataAccessException;
 import dataaccess.DatabaseConfigurator;
 import dataaccess.authdao.AuthDAO;
 import dataaccess.authdao.MemoryAuthDAO;
+import dataaccess.authdao.MySQLAuthDAO;
 import dataaccess.gamedao.GameDAO;
 import dataaccess.gamedao.MemoryGameDAO;
+import dataaccess.gamedao.MySQLGameDAO;
 import dataaccess.userdao.MemoryUserDAO;
 import dataaccess.userdao.MySQLUserDAO;
 import dataaccess.userdao.UserDAO;
@@ -76,16 +78,15 @@ public class Server {
         try {
             databaseConfigurator = new DatabaseConfigurator();
             userDAO = new MySQLUserDAO(databaseConfigurator);
+            authDAO = new MySQLAuthDAO(databaseConfigurator);
+            gameDAO = new MySQLGameDAO(databaseConfigurator);
 
         } catch (DataAccessException e) {
             userDAO = new MemoryUserDAO();
             authDAO = new MemoryAuthDAO();
             gameDAO = new MemoryGameDAO();
         }
-        // if works
-            // create connection to pass to DAOs
-            // make SQL DAOS
-        // otherwise, make Memory DAOS
+
         userService = new UserService(userDAO,authDAO);
         gameService = new GameService(gameDAO,authDAO);
         authService = new AuthService(authDAO);

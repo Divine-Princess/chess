@@ -5,13 +5,9 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseConfigurator;
 import model.data.GameData;
-import model.data.UserData;
-
-import javax.xml.crypto.Data;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class MySQLGameDAO implements GameDAO {
 
@@ -107,16 +103,44 @@ public class MySQLGameDAO implements GameDAO {
     @Override
     public void updateGame(String playerColor, int gameID, String username) throws DataAccessException {
         GameData game = getGame(gameID);
-        String whiteUsername = game.whiteUsername();
-        String blackUsername = game.blackUsername();
+        if (game == null) {
+            throw new DataAccessException("Error: GameID not found");
+        }
+        var statement = "";
 
         if (playerColor.equals("WHITE")) {
-            whiteUsername = username;
+            statement =
+                    """
+                    UPDATE games 
+                    SET whiteUsername=?
+                    WHERE gameID=?
+                    """;
+
         }
         else if (playerColor.equals("BLACK")) {
-            blackUsername = username;
+            statement =
+                    """
+                    UPDATE games 
+                    SET blackUsername=?
+                    WHERE gameID=?
+                    """;
+
         }
 
+        try (Connection conn = db.setupConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(2, gameID);
+                if (playerColor.equals("WHITE")) {
+                    ps.setString(1, username);
+                }
+                else if (playerColor.equals("BLACK")) {
+                    ps.setString(1, username);
+                }
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: Failed to update game");
+        }
 
     }
 

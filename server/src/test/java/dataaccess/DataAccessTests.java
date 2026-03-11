@@ -292,7 +292,7 @@ public class DataAccessTests {
     }
 
     @Test
-    @Order(18)
+    @Order(19)
     @DisplayName("GAME: List Games Empty")
     public void listGamesEmpty() throws DataAccessException {
 
@@ -301,5 +301,37 @@ public class DataAccessTests {
         Collection<GameData> newGameList = gameDAO.listGames();
 
         Assertions.assertIterableEquals(gameList, newGameList);
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("GAME: Update Success")
+    public void updateGameSuccess() throws DataAccessException {
+        GameData gameData = new GameData(1, null,null, "test", new ChessGame());
+        gameDAO.createGame(gameData);
+
+        GameData expectedGameData = new GameData(1, "peanut butter",
+                null, "test", new ChessGame());
+
+        String playerColor = "WHITE";
+
+        Assertions.assertDoesNotThrow(() -> gameDAO.updateGame(playerColor,1, expectedGameData.whiteUsername()));
+        gameDAO.updateGame(playerColor,1, expectedGameData.whiteUsername());
+        GameData newGameData = gameDAO.getGame(1);
+        Assertions.assertNotNull(newGameData);
+        Assertions.assertEquals(expectedGameData, newGameData);
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("GAME: Update Wrong ID")
+    public void updateGameWrongID() throws DataAccessException {
+        GameData gameData = new GameData(1, null,null, "test", new ChessGame());
+        gameDAO.createGame(gameData);
+
+        String playerColor = "WHITE";
+
+        Assertions.assertThrows(DataAccessException.class,
+                () -> gameDAO.updateGame(playerColor,2, "peanut butter"));
     }
 }
