@@ -1,10 +1,8 @@
 package client;
 
-import dataaccess.DataAccessException;
 import model.request.*;
 import model.result.*;
 import org.junit.jupiter.api.*;
-import server.AlreadyTakenException;
 import server.Server;
 import serverfacade.ServerFacade;
 
