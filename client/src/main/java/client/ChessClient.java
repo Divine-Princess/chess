@@ -2,6 +2,7 @@ package client;
 
 import serverfacade.ServerFacade;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class ChessClient {
@@ -24,15 +25,21 @@ public class ChessClient {
         System.out.println(help());
 
         Scanner scanner = new Scanner(System.in);
-        String userInput = "";
+        String command = "";
 
-        while (!userInput.equals("quit")) {
+        while (!command.equals("quit")) {
             prompt();
             String input = scanner.nextLine();
 
-
+            try {
+                command = getCommand(input);
+                System.out.print(command);
+            } catch (Throwable ex) {
+                var message = ex.toString();
+                System.out.print(message);
+            }
         }
-
+        System.out.println("Thanks for playing!");
     }
 
     private void prompt() {
@@ -41,6 +48,64 @@ public class ChessClient {
 
     private void padding() {
         System.out.println("\n* * *\n");
+    }
+
+    private String getCommand(String input) {
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = "help";
+            if (tokens.length > 0) {
+                cmd = tokens[0];
+            }
+            String[] parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "register" -> register(parameters);
+                case "login" -> login(parameters);
+                case "create" -> createGame(parameters);
+                case "list" -> listGames();
+                case "join" -> joinGame(parameters);
+                case "observe" -> observeGame(parameters);
+                case "logout" -> logout();
+                case "quit" -> "quit";
+                default -> help();
+            };
+        } catch (Exception ex) {
+            return ex.getMessage();
+        }
+    }
+
+    // TODO: IMPLEMENT CLIENT CALLING
+
+    private String register(String[] params) {
+        if (params.length >= 1) {
+            state = State.LOGGEDIN;
+
+        }
+        return "";
+    }
+
+    private String login(String[] params) {
+        return "";
+    }
+
+    private String createGame(String[] params) {
+        return "";
+    }
+
+    private String listGames() {
+        return "";
+    }
+
+    private String joinGame(String[] params) {
+        return "";
+    }
+
+    private String observeGame(String[] params) {
+        return "";
+    }
+
+    private String logout() {
+        return "";
     }
 
     private String help() {

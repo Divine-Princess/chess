@@ -33,8 +33,6 @@ public class ServerFacadeTests {
     }
 
 
-    /* TODO -> IMPLEMENT POS/NEG TESTS FOR EACH SERVER FACADE METHOD */
-
     @BeforeEach
     public void setup() {
         facade.clear();
