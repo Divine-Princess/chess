@@ -74,7 +74,6 @@ public class Server {
     }
 
     private void initializeServer() {
-        // try making DataBase Manager
         try {
             databaseConfigurator = new DatabaseConfigurator();
             userDAO = new MySQLUserDAO(databaseConfigurator);

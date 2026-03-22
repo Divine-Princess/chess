@@ -54,7 +54,7 @@ public class ServerFacadeTests {
 
     @Test
     @Order(2)
-    @DisplayName("1 Client Register Failure")
+    @DisplayName("1 Client Register Bad Request")
     public void registerFailure() {
 
         RegisterRequest[] badRequests = {
@@ -66,7 +66,7 @@ public class ServerFacadeTests {
 
         for (RegisterRequest badRequest : badRequests) {
             var ex = Assertions.assertThrows(RuntimeException.class, () -> facade.register(badRequest));
-            Assertions.assertEquals("Client Error", ex.getMessage());
+            Assertions.assertEquals("Bad Request", ex.getMessage());
         }
     }
 
@@ -92,7 +92,7 @@ public class ServerFacadeTests {
 
         for (RegisterRequest newUser : newUsers) {
             var ex = Assertions.assertThrows(RuntimeException.class, () -> facade.register(newUser));
-            Assertions.assertEquals("Client Error", ex.getMessage());
+            Assertions.assertEquals("Already taken", ex.getMessage());
         }
     }
 
@@ -124,7 +124,7 @@ public class ServerFacadeTests {
 
         for (LoginRequest badRequest : badRequests) {
             var ex = Assertions.assertThrows(RuntimeException.class, () -> facade.login(badRequest));
-            Assertions.assertEquals("Client Error", ex.getMessage());
+            Assertions.assertEquals("Bad Request", ex.getMessage());
         }
     }
 
@@ -153,7 +153,7 @@ public class ServerFacadeTests {
         LogoutRequest emptyRequest = new LogoutRequest("");
 
         var ex = Assertions.assertThrows(RuntimeException.class, () -> facade.logout(emptyRequest));
-        Assertions.assertEquals("Client Error", ex.getMessage());
+        Assertions.assertEquals("Unauthorized", ex.getMessage());
     }
 
     @Test
@@ -183,7 +183,7 @@ public class ServerFacadeTests {
         ListGamesRequest testListReq = new ListGamesRequest("");
 
         var ex = Assertions.assertThrows(RuntimeException.class, () -> facade.listGames(testListReq));
-        Assertions.assertEquals("Client Error", ex.getMessage());
+        Assertions.assertEquals("Unauthorized", ex.getMessage());
     }
 
     @Test
@@ -212,7 +212,7 @@ public class ServerFacadeTests {
         CreateGameRequest emptyRequest = new CreateGameRequest("", "");
 
         var ex = Assertions.assertThrows(RuntimeException.class, () -> facade.createGame(emptyRequest));
-        Assertions.assertEquals("Client Error", ex.getMessage());
+        Assertions.assertEquals("Unauthorized", ex.getMessage());
     }
 
     @Test
@@ -230,7 +230,7 @@ public class ServerFacadeTests {
         CreateGameRequest badRequest = new CreateGameRequest(authToken, null);
 
         var ex = Assertions.assertThrows(RuntimeException.class, () -> facade.createGame(badRequest));
-        Assertions.assertEquals("Client Error", ex.getMessage());
+        Assertions.assertEquals("Bad Request", ex.getMessage());
     }
 
     @Test
@@ -304,7 +304,7 @@ public class ServerFacadeTests {
         JoinGameRequest request1 = new JoinGameRequest(authToken1,"WHITE", gameID);
 
         var ex = Assertions.assertThrows(RuntimeException.class, () -> facade2.joinGame(request1));
-        Assertions.assertEquals("Client Error", ex.getMessage());
+        Assertions.assertEquals("Already taken", ex.getMessage());
     }
 
     @Test

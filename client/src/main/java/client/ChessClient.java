@@ -2,9 +2,8 @@ package client;
 
 import model.request.LoginRequest;
 import model.request.RegisterRequest;
+import model.result.RegisterResult;
 import serverfacade.ServerFacade;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -13,6 +12,7 @@ public class ChessClient {
     private final ServerFacade server;
     private State state = State.LOGGEDOUT;
     private final Scanner scanner = new Scanner(System.in);
+    private String authToken;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -81,17 +81,18 @@ public class ChessClient {
 
     private String register() {
         System.out.println("Please enter new username, password, and email in the following format:");
-        System.out.println("[USERNAME] [PASSWORD] [EMAIL]");
+        System.out.println("USERNAME PASSWORD EMAIL");
         System.out.println("Or 'return' to go back");
         while (true) {
             prompt();
             String[] cred = scanner.nextLine().split(" ");
             if (cred.length == 3) {
                 try {
+                    System.out.println(cred[0] + cred[1] + cred[2]);
                     RegisterRequest registerRequest = new RegisterRequest(cred[0], cred[1], cred[2]);
-                    server.register(registerRequest);
+                    RegisterResult result = server.register(registerRequest);
                     state = State.LOGGEDIN;
-                    return "Welcome, " + cred[0] + "!";
+                    return "Welcome, " + result.username() + "!";
                 } catch (Exception ex) {
                     throw new RuntimeException("Error: " + ex.getMessage());
                 }
@@ -99,17 +100,22 @@ public class ChessClient {
             else if (cred[0].equals("return")){
                 return "";
             }
+            else if (cred.length < 3){
+                System.out.println("Missing username, password, or email. \nExpected: USERNAME PASSWORD EMAIL");
+            }
             else {
-                System.out.println("Missing username, password, or email. \nExpected: [USERNAME] [PASSWORD] [EMAIL]");
+                System.out.println("Incorrect format. \nExpected: USERNAME PASSWORD EMAIL");
             }
         }
 
     }
 
     private String login() {
-
+        if (state == State.LOGGEDIN) {
+            return "Already logged in";
+        }
         System.out.println("Please enter username and password in the following format:");
-        System.out.print("[USERNAME] [PASSWORD]");
+        System.out.println("USERNAME PASSWORD");
         System.out.println("Or 'return' to go back");
         while (true) {
             prompt();
@@ -127,8 +133,11 @@ public class ChessClient {
             else if (cred[0].equals("return")){
                 return "";
             }
+            else if (cred.length < 2){
+                System.out.println("Missing username or password. \nExpected: USERNAME PASSWORD");
+            }
             else {
-                System.out.println("Missing username, password, or email. \nExpected: [USERNAME] [PASSWORD] [EMAIL]");
+                System.out.println("Incorrect format. \nExpected: USERNAME PASSWORD");
             }
         }
     }
