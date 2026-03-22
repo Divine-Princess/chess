@@ -1,11 +1,14 @@
 package client;
 
-import model.request.LoginRequest;
-import model.request.RegisterRequest;
+import model.data.GameData;
+import model.request.*;
+import model.result.ListGamesResult;
+import model.result.LoginResult;
+import model.result.LogoutResult;
 import model.result.RegisterResult;
 import serverfacade.ServerFacade;
-import java.util.Arrays;
-import java.util.Scanner;
+
+import java.util.*;
 
 public class ChessClient {
 
@@ -13,6 +16,8 @@ public class ChessClient {
     private State state = State.LOGGEDOUT;
     private final Scanner scanner = new Scanner(System.in);
     private String authToken;
+    private String username;
+    private HashMap<Integer, Integer> games;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -70,14 +75,14 @@ public class ChessClient {
                 case "observe" -> observeGame(parameters);
                 case "logout" -> logout();
                 case "quit" -> "quit";
+                // TODO! REMOVE AFTER TESTING!!!
+                case "clear" -> clear();
                 default -> help();
             };
         } catch (Exception ex) {
             return ex.getMessage();
         }
     }
-
-    // TODO: IMPLEMENT CLIENT CALLING
 
     private String register() {
         System.out.println("Please enter new username, password, and email in the following format:");
@@ -88,11 +93,12 @@ public class ChessClient {
             String[] cred = scanner.nextLine().split(" ");
             if (cred.length == 3) {
                 try {
-                    System.out.println(cred[0] + cred[1] + cred[2]);
                     RegisterRequest registerRequest = new RegisterRequest(cred[0], cred[1], cred[2]);
                     RegisterResult result = server.register(registerRequest);
+                    authToken = result.authToken();
                     state = State.LOGGEDIN;
-                    return "Welcome, " + result.username() + "!";
+                    username = result.username();
+                    return "Welcome, " + username + "!";
                 } catch (Exception ex) {
                     throw new RuntimeException("Error: " + ex.getMessage());
                 }
@@ -123,9 +129,10 @@ public class ChessClient {
             if (cred.length == 2) {
                 try {
                     LoginRequest loginRequest = new LoginRequest(cred[0], cred[1]);
-                    server.login(loginRequest);
+                    LoginResult result = server.login(loginRequest);
                     state = State.LOGGEDIN;
-                    return "Welcome, " + cred[0] + "!";
+                    username = result.username();
+                    return "Welcome back, " + username + "!";
                 } catch (Exception ex) {
                     throw new RuntimeException("Error: " + ex.getMessage());
                 }
@@ -143,11 +150,38 @@ public class ChessClient {
     }
 
     private String createGame(String[] gameName) {
-        return "";
+        String name = String.join(" ", gameName);
+        checkLoggedIn();
+        try {
+            CreateGameRequest request = new CreateGameRequest(authToken, name);
+            server.createGame(request);
+            return name + "successfully created.";
+        } catch (Exception ex) {
+            throw new RuntimeException("Error: " + ex.getMessage());
+        }
     }
 
     private String listGames() {
-        return "";
+        checkLoggedIn();
+        try {
+            ListGamesRequest request = new ListGamesRequest(authToken);
+            ListGamesResult result = server.listGames(request);
+
+            Collection<GameData> gamesList = result.games();
+            this.games = new HashMap<>();
+
+            int gameNum = 1;
+            for (GameData game : gamesList) {
+                games.put(gameNum, game.gameID());
+                gameNum += 1;
+                System.out.println(gameNum + ": " + game.gameName() +
+                        " Players: " + game.whiteUsername() + " (white), " + game.blackUsername() + " (black)");
+            }
+            return "";
+        }
+        catch (Exception ex) {
+            throw new RuntimeException("Error: " + ex.getMessage());
+        }
     }
 
     private String joinGame(String[] params) {
@@ -159,7 +193,31 @@ public class ChessClient {
     }
 
     private String logout() {
-        return "";
+        if (state == State.LOGGEDOUT) {
+            return "Already logged out";
+        }
+        System.out.println("Log out as " + username + "? Y/N");
+        String input = scanner.nextLine();
+        if (input.equalsIgnoreCase("Y")) {
+            try {
+                LogoutRequest request = new LogoutRequest(authToken);
+                server.logout(request);
+                state = State.LOGGEDOUT;
+                this.username = null;
+                return "Logged out successfully";
+
+            } catch (Exception ex) {
+                throw new RuntimeException("Error: " + ex.getMessage());
+            }
+
+        }
+        else if (input.equalsIgnoreCase("N")) {
+            return "";
+        }
+        else {
+            throw new RuntimeException("Incorrect format. Expected: Y/N");
+        }
+
     }
 
     private String help() {
@@ -176,13 +234,29 @@ public class ChessClient {
                 COMMANDS:
                 * create [NAME] -> Make a new CHESS 240 game with name of choice
                 * list -> List all existing CHESS 240 games
-                * join [ID] [WHITE/BLACK] -> Join an existing CHESS 240 game
-                * observe [ID] -> View an existing CHESS 240 game
+                * join [GAME #] [WHITE/BLACK] -> Join an existing CHESS 240 game
+                * observe [GAME #] -> View an existing CHESS 240 game
                 * logout -> Logout current user
                 * quit -> Quit CHESS 240
                 * help -> List possible commands
                 """;
     }
+
+    // TODO: REMOVE AFTER TESTING!!!
+
+    private String clear() {
+        try {
+            server.clear();
+            this.authToken = null;
+            this.username = null;
+            this.state = State.LOGGEDOUT;
+            return "Server Cleared";
+        }
+        catch (Exception ex) {
+            throw new RuntimeException("Unable to clear");
+        }
+    }
+
 
     private void checkLoggedIn() throws RuntimeException {
         if (state == State.LOGGEDOUT) {
