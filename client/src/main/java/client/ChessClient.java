@@ -1,10 +1,10 @@
 package client;
 
+import chess.ChessBoard;
 import model.data.GameData;
 import model.request.*;
 import model.result.ListGamesResult;
 import model.result.LoginResult;
-import model.result.LogoutResult;
 import model.result.RegisterResult;
 import serverfacade.ServerFacade;
 
@@ -185,10 +185,23 @@ public class ChessClient {
     }
 
     private String joinGame(String[] params) {
+        if (!(params.length == 2)) {
+            throw new RuntimeException("Incorrect format. Expected: [NUMBER] [white/black]");
+        }
+        GameplayUI ui = new GameplayUI();
+        int gameNum = Integer.parseInt(params[0]);
+        String color = params[1].toUpperCase();
+        if (!(color.equals("WHITE") || color.equals("BLACK"))) {
+            throw new RuntimeException("Color must be white or black");
+        }
+        int gameID = games.get(gameNum);
+
+        ui.render(new ChessBoard(), color);
+
         return "";
     }
 
-    private String observeGame(String[] id) {
+    private String observeGame(String[] num) {
         return "";
     }
 
@@ -234,7 +247,7 @@ public class ChessClient {
                 COMMANDS:
                 * create [NAME] -> Make a new CHESS 240 game with name of choice
                 * list -> List all existing CHESS 240 games
-                * join [GAME #] [WHITE/BLACK] -> Join an existing CHESS 240 game
+                * join [GAME #] [white/black] -> Join an existing CHESS 240 game
                 * observe [GAME #] -> View an existing CHESS 240 game
                 * logout -> Logout current user
                 * quit -> Quit CHESS 240
