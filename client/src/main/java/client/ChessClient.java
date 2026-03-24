@@ -10,6 +10,8 @@ import serverfacade.ServerFacade;
 
 import java.util.*;
 
+import static ui.EscapeSequences.*;
+
 public class ChessClient {
 
     private final ServerFacade server;
@@ -55,7 +57,7 @@ public class ChessClient {
     }
 
     private void padding() {
-        System.out.println("\n* * *\n");
+        System.out.println("\n" + WHITE_QUEEN + WHITE_QUEEN + WHITE_QUEEN + "\n");
     }
 
     private String getCommand(String input) {
@@ -107,10 +109,13 @@ public class ChessClient {
                 return "";
             }
             else if (cred.length < 3){
-                System.out.println("Missing username, password, or email. \nExpected: USERNAME PASSWORD EMAIL");
+                System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + "Missing username, password, or email."
+                                + SET_TEXT_COLOR_YELLOW +
+                                "\nExpected:" + SET_TEXT_COLOR_LIGHT_GREY + " USERNAME PASSWORD EMAIL");
             }
             else {
-                System.out.println("Incorrect format. \nExpected: USERNAME PASSWORD EMAIL");
+                System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + "Incorrect format." +
+                        SET_TEXT_COLOR_YELLOW + "\nExpected:" + " USERNAME PASSWORD EMAIL");
             }
         }
 
@@ -132,9 +137,10 @@ public class ChessClient {
                     LoginResult result = server.login(loginRequest);
                     state = State.LOGGEDIN;
                     username = result.username();
+                    authToken = result.authToken();
                     return "Welcome back, " + username + "!";
                 } catch (Exception ex) {
-                    throw new RuntimeException("Error: " + ex.getMessage());
+                    throw new RuntimeException("Error: Incorrect Username or Password");
                 }
             }
             else if (cred[0].equals("return")){
@@ -150,15 +156,21 @@ public class ChessClient {
     }
 
     private String createGame(String[] gameName) {
-        String name = String.join(" ", gameName);
+        System.out.println(Arrays.toString(gameName));
+        String name = gameName[0];
+        if (gameName.length > 1) {
+            name = String.join(" ", gameName);
+        }
         checkLoggedIn();
         try {
             CreateGameRequest request = new CreateGameRequest(authToken, name);
             server.createGame(request);
-            return name + "successfully created.";
+            return "'" + name + "'" + " successfully created.";
         } catch (Exception ex) {
             throw new RuntimeException("Error: " + ex.getMessage());
         }
+
+        //throw new RuntimeException("Error: No name given");
     }
 
     private String listGames() {
@@ -196,7 +208,9 @@ public class ChessClient {
         }
         int gameID = games.get(gameNum);
 
-        ui.render(new ChessBoard(), color);
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        ui.render(board, color);
 
         return "";
     }
@@ -235,23 +249,24 @@ public class ChessClient {
 
     private String help() {
         if (state == State.LOGGEDOUT) {
-            return """
-                    COMMANDS:
-                    * register -> Create Account
-                    * login [USERNAME] [PASSWORD] -> Login as existing user
-                    * help -> List possible commands
-                    * quit -> Quit CHESS 240
-                    """;
+            return SET_TEXT_BOLD + SET_TEXT_COLOR_MAGENTA + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
+                    + SET_TEXT_COLOR_BLUE + RESET_TEXT_BOLD_FAINT +
+                    "♢ register " + SET_TEXT_COLOR_MAGENTA + "🡒 Create Account\n" + SET_TEXT_COLOR_BLUE +
+                    "♢ login [USERNAME] [PASSWORD] " + SET_TEXT_COLOR_MAGENTA + "🡒 Login as existing user\n"
+                    + SET_TEXT_COLOR_BLUE +
+                    "♢ help " + SET_TEXT_COLOR_MAGENTA + "🡒 List possible commands\n"
+                    + SET_TEXT_COLOR_BLUE +
+                    "♢ quit " + SET_TEXT_COLOR_MAGENTA + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
         }
         return """
                 COMMANDS:
-                * create [NAME] -> Make a new CHESS 240 game with name of choice
-                * list -> List all existing CHESS 240 games
-                * join [GAME #] [white/black] -> Join an existing CHESS 240 game
-                * observe [GAME #] -> View an existing CHESS 240 game
-                * logout -> Logout current user
-                * quit -> Quit CHESS 240
-                * help -> List possible commands
+                * create [NAME] 🡒 Make a new CHESS 240 game with name of choice
+                * list 🡒 List all existing CHESS 240 games
+                * join [GAME #] [white/black] 🡒 Join an existing CHESS 240 game
+                * observe [GAME #] 🡒 View an existing CHESS 240 game
+                * logout 🡒 Logout current user
+                * quit 🡒 Quit CHESS 240
+                * help 🡒 List possible commands
                 """;
     }
 
