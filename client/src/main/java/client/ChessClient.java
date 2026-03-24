@@ -190,6 +190,7 @@ public class ChessClient {
     }
 
     private String createGame(String[] gameName) {
+        checkLoggedIn();
         if (gameName.length < 1) {
             throw new RuntimeException(errorColor + "Error: No name given" + RESET_TEXT_COLOR);
         }
@@ -223,6 +224,14 @@ public class ChessClient {
 
             StringBuilder stringBuilder = new StringBuilder();
             for (GameData game : gamesList) {
+                String whiteUser = game.whiteUsername();
+                String blackUser = game.blackUsername();
+                if (whiteUser == null) {
+                    whiteUser = "None";
+                }
+                if (blackUser == null) {
+                    blackUser = "None";
+                }
                 games.put(gameNum, game.gameID());
                 stringBuilder.append(inputColor)
                         .append(SET_TEXT_BOLD)
@@ -234,9 +243,9 @@ public class ChessClient {
                         .append(game.gameName())
                         .append("' - ")
                         .append(" Players: ")
-                        .append(game.whiteUsername())
+                        .append(whiteUser)
                         .append(" (white), ")
-                        .append(game.blackUsername())
+                        .append(blackUser)
                         .append(" (black)\n")
                         .append(RESET_TEXT_COLOR);
                 gameNum += 1;
@@ -255,6 +264,7 @@ public class ChessClient {
     }
 
     private String joinGame(String[] params) {
+        checkLoggedIn();
         if (!(params.length == 2)) {
             throw new RuntimeException(errorColor +
                     "Error: Incorrect format. Expected: join [NUMBER] [white/black]" + RESET_TEXT_COLOR);
@@ -269,25 +279,39 @@ public class ChessClient {
             throw new RuntimeException(errorColor +
                     "Error: Please list games before attempting to join." + RESET_TEXT_COLOR);
         }
-        try {
-            int gameNum = Integer.parseInt(params[0]);
+        int gameNum;
 
-            if (!(games.containsKey(gameNum))) {
-                throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
-            }
+        try {
+            gameNum = Integer.parseInt(params[0]);
+
+        } catch (Exception ex) {
+            throw new RuntimeException(errorColor + "Error: '" + params[0] + "' " + "not a number" + RESET_TEXT_COLOR);
+        }
+
+        if (!(games.containsKey(gameNum))) {
+            throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
+        }
+
+        int gameID = games.get(gameNum);
+
+        try {
+            JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, color, gameID);
+            server.joinGame(joinGameRequest);
 
             ChessBoard board = new ChessBoard();
             board.resetBoard();
             ui.render(board, color);
 
             return "";
-
-        } catch (Exception ex) {
-            throw new RuntimeException(errorColor + "Error: '" + params[0] + "' " + "not a number" + RESET_TEXT_COLOR);
         }
+        catch (Exception ex) {
+            throw new RuntimeException(errorColor + "Error: " + ex.getMessage() + RESET_TEXT_COLOR);
+        }
+
     }
 
     private String observeGame(String[] num) {
+        checkLoggedIn();
         if (!(num.length == 1)) {
             throw new RuntimeException(errorColor +
                     "Error: Incorrect format. Expected: observe [NUMBER]" + RESET_TEXT_COLOR);

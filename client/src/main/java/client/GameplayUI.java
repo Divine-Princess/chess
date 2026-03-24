@@ -17,25 +17,27 @@ public class GameplayUI {
         int step;
         int start;
         int end;
+        String whiteSquare;
+        String blackSquare;
 
         if (color.equalsIgnoreCase("WHITE")) {
             whiteSide();
-            step = -1;
-            start = 8;
-            end = 1;
-        }
-        else {
-            blackSide();
             step = 1;
             start = 1;
             end = 8;
+        }
+        else {
+            blackSide();
+            step = -1;
+            start = 8;
+            end = 1;
 
         }
 
         for (int i = start; i != end + step; i += step) {
             System.out.print(sideBg + sideText + " " +
-                    i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
-            for (int j = 8; j >= 1; j--) {
+                    (9-i) + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
+            for (int j = start; j != end + step; j += step) {
                 ChessPosition pos = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(pos);
                 String symbol;
@@ -70,7 +72,7 @@ public class GameplayUI {
                 System.out.print(bgColor + textColor + symbol + RESET_TEXT_COLOR + RESET_BG_COLOR);
             }
             System.out.print(sideBg + sideText + " " +
-                    i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+                    (9-i) + " " + RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         }
         if (color.equalsIgnoreCase("WHITE")) { whiteSide();} else { blackSide(); }
     }
