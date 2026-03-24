@@ -20,6 +20,9 @@ public class ChessClient {
     private String authToken;
     private String username;
     private HashMap<Integer, Integer> games;
+    private final String errorColor = SET_TEXT_COLOR_YELLOW;
+    private final String mainColor = SET_TEXT_COLOR_MAGENTA;
+    private final String inputColor = SET_TEXT_COLOR_BLUE;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -31,7 +34,7 @@ public class ChessClient {
     }
 
     public void run() {
-        System.out.println(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + "Welcome to CHESS 240!" +
+        System.out.println(SET_TEXT_COLOR_WHITE + SET_TEXT_BOLD + "Welcome to CHESS 240!" +
         RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
         padding();
         System.out.println(help());
@@ -44,23 +47,25 @@ public class ChessClient {
 
             try {
                 command = getCommand(input);
-                System.out.print(command);
+                if (!(command.isEmpty())) { padding(); }
+                if (!(command.equals("quit"))) { System.out.print(command); }
             } catch (Throwable ex) {
                 var message = ex.toString();
-                System.out.print(message);
+                System.out.print(errorColor + message + RESET_TEXT_COLOR);
             }
         }
-        System.out.println("\nThanks for playing!");
+        System.out.println(SET_TEXT_COLOR_WHITE + SET_TEXT_BOLD +
+                "\nThanks for playing!" + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
     }
 
     private void prompt() {
-        System.out.print("\n>>> ");
+        System.out.print(inputColor + "\n\n>>> " + RESET_TEXT_COLOR);
     }
 
     private void padding() {
-        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE +
+        System.out.println(SET_TEXT_COLOR_WHITE +
                 "\n" + WHITE_QUEEN + WHITE_QUEEN + WHITE_QUEEN + "\n"
-                + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
+                + RESET_TEXT_COLOR);
     }
 
     private String getCommand(String input) {
@@ -90,11 +95,13 @@ public class ChessClient {
     }
 
     private String register() {
-        System.out.println(SET_TEXT_COLOR_MAGENTA +
-                "\nPlease enter new username, password, and email in the following format:");
-        System.out.println(SET_TEXT_COLOR_BLUE + SET_TEXT_UNDERLINE
-                + "USERNAME PASSWORD EMAIL" + RESET_TEXT_UNDERLINE);
-        System.out.println(SET_TEXT_COLOR_BLUE + "Or 'return' to go back" + RESET_TEXT_COLOR);
+        System.out.println(mainColor +
+                "\n\uD83D\uDF9B Please enter new username, password, " +
+                "and email in the following format: \uD83D\uDF9B");
+        System.out.println(inputColor + SET_TEXT_BOLD
+                + "USERNAME PASSWORD EMAIL" + RESET_TEXT_BOLD_FAINT + RESET_TEXT_COLOR);
+        System.out.println(mainColor + "Or " + inputColor +
+                        "return" + mainColor + " to go back" + inputColor);
         while (true) {
             prompt();
             String[] cred = scanner.nextLine().split(" ");
@@ -105,22 +112,30 @@ public class ChessClient {
                     authToken = result.authToken();
                     state = State.LOGGEDIN;
                     username = result.username();
-                    return "Welcome, " + username + "!";
+                    return "Welcome, " + username + "!\n";
                 } catch (Exception ex) {
-                    throw new RuntimeException("Error: " + ex.getMessage());
+                    throw new RuntimeException(errorColor +
+                            "Error: " + ex.getMessage() + RESET_TEXT_COLOR);
                 }
             }
             else if (cred[0].equals("return")){
                 return "";
             }
             else if (cred.length < 3){
-                System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + "Missing username, password, or email."
-                                + SET_TEXT_COLOR_YELLOW +
-                                "\nExpected:" + SET_TEXT_COLOR_LIGHT_GREY + " USERNAME PASSWORD EMAIL");
+                System.out.println(SET_TEXT_BOLD + errorColor + "Missing username, password, or email."
+                                + mainColor + RESET_TEXT_BOLD_FAINT + "\nExpected:" + SET_TEXT_BOLD
+                                + inputColor + " USERNAME PASSWORD EMAIL" + RESET_TEXT_BOLD_FAINT
+                                + RESET_TEXT_COLOR);
+                System.out.println(mainColor + "Enter " +  inputColor +
+                        "return" + mainColor + " to go back" + RESET_TEXT_COLOR);
             }
             else {
-                System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_RED + "Incorrect format." +
-                        SET_TEXT_COLOR_YELLOW + "\nExpected:" + " USERNAME PASSWORD EMAIL");
+                System.out.println(SET_TEXT_BOLD + errorColor + "Incorrect format." + RESET_TEXT_BOLD_FAINT
+                                 + mainColor + "\nExpected:" + SET_TEXT_BOLD
+                                 + inputColor + " USERNAME PASSWORD EMAIL"
+                                 + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
+                System.out.println(mainColor + "Enter " +  inputColor +
+                        "return" + mainColor + " to go back" + RESET_TEXT_COLOR);
             }
         }
 
@@ -128,11 +143,14 @@ public class ChessClient {
 
     private String login() {
         if (state == State.LOGGEDIN) {
-            return "\nAlready logged in";
+            return errorColor + "\nAlready logged in" + RESET_TEXT_COLOR;
         }
-        System.out.println("\nPlease enter username and password in the following format:");
-        System.out.println("USERNAME PASSWORD");
-        System.out.println("Or 'return' to go back");
+        System.out.println(mainColor +
+                "\n\uD83D\uDF9B Please enter username and password in the following format: \uD83D\uDF9B");
+        System.out.println(inputColor + SET_TEXT_BOLD + "USERNAME PASSWORD"
+                            + RESET_TEXT_BOLD_FAINT + RESET_TEXT_COLOR);
+        System.out.println(mainColor + "Or " + inputColor +
+                "return" + mainColor + " to go back" + RESET_TEXT_COLOR);
         while (true) {
             prompt();
             String[] cred = scanner.nextLine().split(" ");
@@ -143,39 +161,53 @@ public class ChessClient {
                     state = State.LOGGEDIN;
                     username = result.username();
                     authToken = result.authToken();
-                    return "Welcome back, " + username + "!";
+                    return "Welcome back, " + username + "!\n";
                 } catch (Exception ex) {
-                    throw new RuntimeException("Error: Incorrect Username or Password");
+                    throw new RuntimeException(errorColor +
+                            "Error: Incorrect Username or Password" + RESET_TEXT_COLOR);
                 }
             }
             else if (cred[0].equals("return")){
                 return "";
             }
             else if (cred.length < 2){
-                System.out.println("Missing username or password. \nExpected: USERNAME PASSWORD");
+                System.out.println(SET_TEXT_BOLD + errorColor + "Missing username or password."
+                        + mainColor + RESET_TEXT_BOLD_FAINT + "\nExpected:" + SET_TEXT_BOLD
+                        + inputColor + " USERNAME PASSWORD EMAIL" + RESET_TEXT_BOLD_FAINT
+                        + RESET_TEXT_COLOR);
+                System.out.println(mainColor + "Enter " +  inputColor +
+                        "return" + mainColor + " to go back" + RESET_TEXT_COLOR);
             }
             else {
-                System.out.println("Incorrect format. \nExpected: USERNAME PASSWORD");
+                System.out.println(SET_TEXT_BOLD + errorColor + "Incorrect format." + RESET_TEXT_BOLD_FAINT
+                        + mainColor + "\nExpected:" + SET_TEXT_BOLD
+                        + inputColor + " USERNAME PASSWORD"
+                        + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
+                System.out.println(mainColor + "Enter " +  inputColor +
+                        "return" + mainColor + " to go back" + RESET_TEXT_COLOR);
             }
         }
     }
 
     private String createGame(String[] gameName) {
-        System.out.println(Arrays.toString(gameName));
+        if (gameName.length < 1) {
+            throw new RuntimeException(errorColor + "Error: No name given" + RESET_TEXT_COLOR);
+        }
         String name = gameName[0];
         if (gameName.length > 1) {
             name = String.join(" ", gameName);
         }
+
         checkLoggedIn();
         try {
             CreateGameRequest request = new CreateGameRequest(authToken, name);
             server.createGame(request);
-            return "'" + name + "'" + " successfully created.";
+            return mainColor + "'" + name + "'" + " successfully created." + RESET_TEXT_COLOR;
         } catch (Exception ex) {
-            throw new RuntimeException("Error: " + ex.getMessage());
+            throw new RuntimeException(errorColor + "Error: " + ex.getMessage() + RESET_TEXT_COLOR);
         }
 
-        //throw new RuntimeException("Error: No name given");
+
     }
 
     private String listGames() {
@@ -188,51 +220,107 @@ public class ChessClient {
             this.games = new HashMap<>();
 
             int gameNum = 1;
+
+            StringBuilder stringBuilder = new StringBuilder();
             for (GameData game : gamesList) {
                 games.put(gameNum, game.gameID());
-                System.out.println(gameNum + ": " + game.gameName() +
-                        " Players: " + game.whiteUsername() + " (white), " + game.blackUsername() + " (black)");
+                stringBuilder.append(inputColor)
+                        .append(SET_TEXT_BOLD)
+                        .append(gameNum)
+                        .append(RESET_TEXT_BOLD_FAINT)
+                        .append(": ")
+                        .append(mainColor)
+                        .append("'")
+                        .append(game.gameName())
+                        .append("' - ")
+                        .append(" Players: ")
+                        .append(game.whiteUsername())
+                        .append(" (white), ")
+                        .append(game.blackUsername())
+                        .append(" (black)\n")
+                        .append(RESET_TEXT_COLOR);
                 gameNum += 1;
             }
-            return "";
+            if (games.isEmpty()) {
+                return errorColor +
+                        "Error: No games to list! Please create a new game to play."
+                        + RESET_TEXT_COLOR;
+            }
+
+            return stringBuilder.toString();
         }
         catch (Exception ex) {
-            throw new RuntimeException("Error: " + ex.getMessage());
+            throw new RuntimeException(errorColor + "Error: " + ex.getMessage() + RESET_TEXT_COLOR);
         }
     }
 
     private String joinGame(String[] params) {
         if (!(params.length == 2)) {
-            throw new RuntimeException("Incorrect format. Expected: [NUMBER] [white/black]");
+            throw new RuntimeException(errorColor +
+                    "Error: Incorrect format. Expected: join [NUMBER] [white/black]" + RESET_TEXT_COLOR);
         }
         GameplayUI ui = new GameplayUI();
-        int gameNum = Integer.parseInt(params[0]);
         String color = params[1].toUpperCase();
         if (!(color.equals("WHITE") || color.equals("BLACK"))) {
-            throw new RuntimeException("Color must be white or black");
+            throw new RuntimeException(errorColor + "Error: Color must be white or black" + RESET_TEXT_COLOR);
         }
 
-        if (games.isEmpty()) {
-            throw new RuntimeException(SET_TEXT_COLOR_YELLOW +
-                    "Please list games before attempting to join." + RESET_TEXT_COLOR);
+        if (games == null || games.isEmpty()) {
+            throw new RuntimeException(errorColor +
+                    "Error: Please list games before attempting to join." + RESET_TEXT_COLOR);
         }
+        try {
+            int gameNum = Integer.parseInt(params[0]);
 
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-        ui.render(board, color);
+            if (!(games.containsKey(gameNum))) {
+                throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
+            }
 
-        return "";
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+            ui.render(board, color);
+
+            return "";
+
+        } catch (Exception ex) {
+            throw new RuntimeException(errorColor + "Error: '" + params[0] + "' " + "not a number" + RESET_TEXT_COLOR);
+        }
     }
 
     private String observeGame(String[] num) {
-        return "";
+        if (!(num.length == 1)) {
+            throw new RuntimeException(errorColor +
+                    "Error: Incorrect format. Expected: observe [NUMBER]" + RESET_TEXT_COLOR);
+        }
+        GameplayUI ui = new GameplayUI();
+
+        if (games == null || games.isEmpty()) {
+            throw new RuntimeException(errorColor +
+                    "Error: Please list games before attempting to observe." + RESET_TEXT_COLOR);
+        }
+        try {
+            int gameNum = Integer.parseInt(num[0]);
+
+            if (!(games.containsKey(gameNum))) {
+                throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
+            }
+
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+            ui.render(board, "WHITE");
+
+            return "";
+
+        } catch (Exception ex) {
+            throw new RuntimeException(errorColor + "Error: '" + num[0] + "' " + "not a number" + RESET_TEXT_COLOR);
+        }
     }
 
     private String logout() {
         if (state == State.LOGGEDOUT) {
-            return "Already logged out";
+            return errorColor + "Already logged out" + RESET_TEXT_COLOR;
         }
-        System.out.println("Log out as " + username + "? Y/N");
+        System.out.println(mainColor + "Log out as " + username + "? Y/N" + RESET_TEXT_COLOR);
         String input = scanner.nextLine();
         if (input.equalsIgnoreCase("Y")) {
             try {
@@ -240,48 +328,48 @@ public class ChessClient {
                 server.logout(request);
                 state = State.LOGGEDOUT;
                 this.username = null;
-                return "Logged out successfully";
+                return mainColor + "Logged out successfully" + RESET_TEXT_COLOR;
 
             } catch (Exception ex) {
-                throw new RuntimeException("Error: " + ex.getMessage());
+                throw new RuntimeException(errorColor + "Error: " + ex.getMessage() + RESET_TEXT_COLOR);
             }
 
         }
         else if (input.equalsIgnoreCase("N")) {
-            return "";
+            return " ";
         }
         else {
-            throw new RuntimeException("Incorrect format. Expected: Y/N");
+            throw new RuntimeException(errorColor + "Error: Incorrect format. Expected: Y/N" + RESET_TEXT_COLOR);
         }
 
     }
 
     private String help() {
         if (state == State.LOGGEDOUT) {
-            return SET_TEXT_BOLD + SET_TEXT_COLOR_MAGENTA + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
-                    + SET_TEXT_COLOR_BLUE + RESET_TEXT_BOLD_FAINT +
-                    "♢ register " + SET_TEXT_COLOR_MAGENTA + "🡒 Create Account\n" + SET_TEXT_COLOR_BLUE +
-                    "♢ login [USERNAME] [PASSWORD] " + SET_TEXT_COLOR_MAGENTA + "🡒 Login as existing user\n"
-                    + SET_TEXT_COLOR_BLUE +
-                    "♢ help " + SET_TEXT_COLOR_MAGENTA + "🡒 List possible commands\n"
-                    + SET_TEXT_COLOR_BLUE +
-                    "♢ quit " + SET_TEXT_COLOR_MAGENTA + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
+            return SET_TEXT_BOLD + mainColor + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
+                    + inputColor + RESET_TEXT_BOLD_FAINT +
+                    "♢ register " + mainColor + "🡒 Create Account\n" + inputColor +
+                    "♢ login " + mainColor + "🡒 Login as existing user\n"
+                    + inputColor +
+                    "♢ help " + mainColor + "🡒 List possible commands\n"
+                    + inputColor +
+                    "♢ quit " + mainColor + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
         }
-        return SET_TEXT_BOLD + SET_TEXT_COLOR_MAGENTA + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
-                + SET_TEXT_COLOR_BLUE + RESET_TEXT_BOLD_FAINT +
-                "♢ create [NAME] " + SET_TEXT_COLOR_MAGENTA + "🡒 Make a new CHESS 240 game with name of choice\n"
-                + SET_TEXT_COLOR_BLUE +
-                "♢ list " + SET_TEXT_COLOR_MAGENTA + "🡒 List all existing CHESS 240 games\n"
-                + SET_TEXT_COLOR_BLUE +
-                "♢ join [GAME #] [white/black] " + SET_TEXT_COLOR_MAGENTA + "🡒 Join an existing CHESS 240 game\n"
-                + SET_TEXT_COLOR_BLUE +
-                "♢ observe [GAME #] " + SET_TEXT_COLOR_MAGENTA + "🡒 View an existing CHESS 240 game\n"
-                + SET_TEXT_COLOR_BLUE +
-                "♢ logout " + SET_TEXT_COLOR_MAGENTA + "🡒 View an existing CHESS 240 game\n"
-                + SET_TEXT_COLOR_BLUE +
-                "♢ help " + SET_TEXT_COLOR_MAGENTA + "🡒 List possible commands\n"
-                + SET_TEXT_COLOR_BLUE +
-                "♢ quit " + SET_TEXT_COLOR_MAGENTA + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
+        return SET_TEXT_BOLD + mainColor + "  \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
+                + inputColor + RESET_TEXT_BOLD_FAINT +
+                "♢ create [NAME] " + mainColor + "🡒 Make a new CHESS 240 game with name of choice\n"
+                + inputColor +
+                "♢ list " + mainColor + "🡒 List all existing CHESS 240 games\n"
+                + inputColor +
+                "♢ join [GAME #] [white/black] " + mainColor + "🡒 Join an existing CHESS 240 game\n"
+                + inputColor +
+                "♢ observe [GAME #] " + mainColor + "🡒 View an existing CHESS 240 game\n"
+                + inputColor +
+                "♢ logout " + mainColor + "🡒 Log out current user\n"
+                + inputColor +
+                "♢ help " + mainColor + "🡒 List possible commands\n"
+                + inputColor +
+                "♢ quit " + mainColor + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
     }
 
     // TODO: REMOVE AFTER TESTING!!!
@@ -302,7 +390,8 @@ public class ChessClient {
 
     private void checkLoggedIn() throws RuntimeException {
         if (state == State.LOGGEDOUT) {
-            throw new RuntimeException("Must be signed in to perform this action");
+            throw new RuntimeException(errorColor + "Error: Must be signed in to perform this action"
+            + RESET_TEXT_COLOR);
         }
     }
 }

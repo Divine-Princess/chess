@@ -9,10 +9,9 @@ import static ui.EscapeSequences.*;
 
 public class GameplayUI {
 
-    private final String sideBg = SET_TEXT_COLOR_DARK_GREY;
-    private final String sideText = SET_TEXT_COLOR_LIGHT_GREY;
-    private final String blackText = SET_TEXT_COLOR_BLACK;
-    private final String whiteText = SET_TEXT_COLOR_WHITE;
+    private final String sideBg = SET_BG_COLOR_DARK_GREY;
+    private final String sideText = SET_TEXT_COLOR_MAGENTA;
+
 
     public void render(ChessBoard board, String color) {
         int step;
@@ -39,15 +38,15 @@ public class GameplayUI {
             for (int j = 8; j >= 1; j--) {
                 ChessPosition pos = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(pos);
-                String symbol = "";
-                String bgColor = "";
+                String symbol;
+                String bgColor;
                 String textColor = "";
 
                 if ((i + j) % 2 == 0) {
                     bgColor = SET_BG_COLOR_LIGHT_GREY;
                 }
                 else {
-                    bgColor = SET_BG_COLOR_DARK_GREEN;
+                    bgColor = SET_BG_COLOR_BLACK;
                 }
 
                 if (piece == null) {
@@ -55,9 +54,9 @@ public class GameplayUI {
                 }
                 else {
                     if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                        textColor = whiteText;
+                        textColor = SET_TEXT_COLOR_BLUE;
                     } else {
-                        textColor = blackText;
+                        textColor = SET_TEXT_COLOR_YELLOW;
                     }
                     symbol = switch (piece.getPieceType()) {
                         case PAWN -> BLACK_PAWN;
