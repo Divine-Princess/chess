@@ -31,7 +31,8 @@ public class ChessClient {
     }
 
     public void run() {
-        System.out.println("Welcome to CHESS 240!");
+        System.out.println(SET_TEXT_COLOR_BLUE + SET_TEXT_BOLD + "Welcome to CHESS 240!" +
+        RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
         padding();
         System.out.println(help());
 
@@ -57,7 +58,9 @@ public class ChessClient {
     }
 
     private void padding() {
-        System.out.println("\n" + WHITE_QUEEN + WHITE_QUEEN + WHITE_QUEEN + "\n");
+        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE +
+                "\n" + WHITE_QUEEN + WHITE_QUEEN + WHITE_QUEEN + "\n"
+                + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
     }
 
     private String getCommand(String input) {
@@ -69,8 +72,8 @@ public class ChessClient {
             }
             String[] parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "register" -> register();
-                case "login" -> login();
+                case "register" -> register() + help();
+                case "login" -> login() + help();
                 case "create" -> createGame(parameters);
                 case "list" -> listGames();
                 case "join" -> joinGame(parameters);
@@ -87,9 +90,11 @@ public class ChessClient {
     }
 
     private String register() {
-        System.out.println("Please enter new username, password, and email in the following format:");
-        System.out.println("USERNAME PASSWORD EMAIL");
-        System.out.println("Or 'return' to go back");
+        System.out.println(SET_TEXT_COLOR_MAGENTA +
+                "\nPlease enter new username, password, and email in the following format:");
+        System.out.println(SET_TEXT_COLOR_BLUE + SET_TEXT_UNDERLINE
+                + "USERNAME PASSWORD EMAIL" + RESET_TEXT_UNDERLINE);
+        System.out.println(SET_TEXT_COLOR_BLUE + "Or 'return' to go back" + RESET_TEXT_COLOR);
         while (true) {
             prompt();
             String[] cred = scanner.nextLine().split(" ");
@@ -123,9 +128,9 @@ public class ChessClient {
 
     private String login() {
         if (state == State.LOGGEDIN) {
-            return "Already logged in";
+            return "\nAlready logged in";
         }
-        System.out.println("Please enter username and password in the following format:");
+        System.out.println("\nPlease enter username and password in the following format:");
         System.out.println("USERNAME PASSWORD");
         System.out.println("Or 'return' to go back");
         while (true) {
@@ -185,9 +190,9 @@ public class ChessClient {
             int gameNum = 1;
             for (GameData game : gamesList) {
                 games.put(gameNum, game.gameID());
-                gameNum += 1;
                 System.out.println(gameNum + ": " + game.gameName() +
                         " Players: " + game.whiteUsername() + " (white), " + game.blackUsername() + " (black)");
+                gameNum += 1;
             }
             return "";
         }
@@ -206,7 +211,11 @@ public class ChessClient {
         if (!(color.equals("WHITE") || color.equals("BLACK"))) {
             throw new RuntimeException("Color must be white or black");
         }
-        int gameID = games.get(gameNum);
+
+        if (games.isEmpty()) {
+            throw new RuntimeException(SET_TEXT_COLOR_YELLOW +
+                    "Please list games before attempting to join." + RESET_TEXT_COLOR);
+        }
 
         ChessBoard board = new ChessBoard();
         board.resetBoard();
@@ -258,16 +267,21 @@ public class ChessClient {
                     + SET_TEXT_COLOR_BLUE +
                     "♢ quit " + SET_TEXT_COLOR_MAGENTA + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
         }
-        return """
-                COMMANDS:
-                * create [NAME] 🡒 Make a new CHESS 240 game with name of choice
-                * list 🡒 List all existing CHESS 240 games
-                * join [GAME #] [white/black] 🡒 Join an existing CHESS 240 game
-                * observe [GAME #] 🡒 View an existing CHESS 240 game
-                * logout 🡒 Logout current user
-                * quit 🡒 Quit CHESS 240
-                * help 🡒 List possible commands
-                """;
+        return SET_TEXT_BOLD + SET_TEXT_COLOR_MAGENTA + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
+                + SET_TEXT_COLOR_BLUE + RESET_TEXT_BOLD_FAINT +
+                "♢ create [NAME] " + SET_TEXT_COLOR_MAGENTA + "🡒 Make a new CHESS 240 game with name of choice\n"
+                + SET_TEXT_COLOR_BLUE +
+                "♢ list " + SET_TEXT_COLOR_MAGENTA + "🡒 List all existing CHESS 240 games\n"
+                + SET_TEXT_COLOR_BLUE +
+                "♢ join [GAME #] [white/black] " + SET_TEXT_COLOR_MAGENTA + "🡒 Join an existing CHESS 240 game\n"
+                + SET_TEXT_COLOR_BLUE +
+                "♢ observe [GAME #] " + SET_TEXT_COLOR_MAGENTA + "🡒 View an existing CHESS 240 game\n"
+                + SET_TEXT_COLOR_BLUE +
+                "♢ logout " + SET_TEXT_COLOR_MAGENTA + "🡒 View an existing CHESS 240 game\n"
+                + SET_TEXT_COLOR_BLUE +
+                "♢ help " + SET_TEXT_COLOR_MAGENTA + "🡒 List possible commands\n"
+                + SET_TEXT_COLOR_BLUE +
+                "♢ quit " + SET_TEXT_COLOR_MAGENTA + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
     }
 
     // TODO: REMOVE AFTER TESTING!!!
