@@ -16,6 +16,7 @@ import model.result.ListGamesResult;
 import server.AlreadyTakenException;
 import server.BadRequestException;
 import server.UnauthorizedException;
+import websocket.commands.UserGameCommand;
 
 import java.util.*;
 
@@ -110,7 +111,14 @@ public class GameService {
         return new JoinGameResult();
     }
 
-    public ChessGame updateGame(int gameID) {
+    public ChessGame getGame(UserGameCommand command) throws DataAccessException {
+        GameData data = gameDAO.getGame(command.getGameID());
+        return data.game();
+    }
+
+    public ChessGame updateGame(UserGameCommand command) {
+
+
 
     }
 

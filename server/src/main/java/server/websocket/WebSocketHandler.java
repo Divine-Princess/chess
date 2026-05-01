@@ -1,6 +1,8 @@
 package server.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -11,11 +13,13 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.ServerMessage;
 
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final GameService gameService;
-    private final ConnectionManager connectionManager = new ConnectionManager();
+    private final ConnectionManager connections = new ConnectionManager();
     private UserGameCommand command;
 
     public WebSocketHandler(GameService gameService) {
@@ -50,11 +54,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void connect(Session session) {
-        // SEND BACK A LOAD_GAME
-
-
-
+    private void connect(Session session) throws DataAccessException {
+        try {
+            connections.addSessionToGame(command.getGameID(), session);
+            ChessGame chessGame = gameService.getGame(command);
+            LoadGameMessage loadGameMessage =
+                    new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, chessGame);
+            String jsonMessage = new Gson().toJson(loadGameMessage);
+            connections.broadcastMessage(session, jsonMessage, command.getGameID());
+        }
+        catch (Exception ex) {
+            throw new DataAccessException("Unable to access game.");
+        }
     }
 
     private void makeMove(Session session) {
@@ -70,5 +81,5 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         // NO MOVES CAN BE MADE
     }
 
-    // loadGame (make method that sends current board state)
+
 }
