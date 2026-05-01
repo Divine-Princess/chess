@@ -99,7 +99,7 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(String playerColor, int gameID, String username) throws DataAccessException {
+    public void updatePlayers(String playerColor, int gameID, String username) throws DataAccessException {
         GameData game = getGame(gameID);
         if (game == null) {
             throw new DataAccessException("GameID not found");

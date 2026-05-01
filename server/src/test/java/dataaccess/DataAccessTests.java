@@ -315,8 +315,8 @@ public class DataAccessTests {
 
         String playerColor = "WHITE";
 
-        Assertions.assertDoesNotThrow(() -> gameDAO.updateGame(playerColor,1, expectedGameData.whiteUsername()));
-        gameDAO.updateGame(playerColor,1, expectedGameData.whiteUsername());
+        Assertions.assertDoesNotThrow(() -> gameDAO.updatePlayers(playerColor,1, expectedGameData.whiteUsername()));
+        gameDAO.updatePlayers(playerColor,1, expectedGameData.whiteUsername());
         GameData newGameData = gameDAO.getGame(1);
         Assertions.assertNotNull(newGameData);
         Assertions.assertEquals(expectedGameData, newGameData);
@@ -332,6 +332,6 @@ public class DataAccessTests {
         String playerColor = "WHITE";
 
         Assertions.assertThrows(DataAccessException.class,
-                () -> gameDAO.updateGame(playerColor,2, "peanut butter"));
+                () -> gameDAO.updatePlayers(playerColor,2, "peanut butter"));
     }
 }

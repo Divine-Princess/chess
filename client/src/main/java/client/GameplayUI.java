@@ -4,10 +4,12 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import client.websocket.GameHandler;
+import websocket.messages.ServerMessage;
 
 import static ui.EscapeSequences.*;
 
-public class GameplayUI {
+public class GameplayUI implements GameHandler {
 
     private final String sideBg = SET_BG_COLOR_DARK_GREY;
     private final String sideText = SET_TEXT_COLOR_MAGENTA;
@@ -90,5 +92,15 @@ public class GameplayUI {
                 " \u2009h\u2009 " + " \u2009g\u2009 " + " \u2009f\u2009 " + " \u2009e\u2009 " +
                 " \u2009d\u2009 " + " \u2009c\u2009 " + " \u2009b\u2009 " + " \u2009a\u2009 " + "   " +
                 RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+    }
+
+    @Override
+    public void updateGame(ChessGame game) {
+
+    }
+
+    @Override
+    public void printMessage(ServerMessage message) {
+
     }
 }

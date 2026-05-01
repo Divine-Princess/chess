@@ -15,6 +15,8 @@ import dataaccess.userdao.UserDAO;
 import io.javalin.*;
 import io.javalin.http.Context;
 import server.handler.*;
+import server.websocket.ConnectionManager;
+import server.websocket.WebSocketHandler;
 import service.GameService;
 import service.UserService;
 import service.AuthService;
@@ -35,12 +37,13 @@ public class Server {
     Handler createGameHandler;
     Handler joinGameHandler;
     DatabaseConfigurator databaseConfigurator;
+    WebSocketHandler webSocketHandler;
+    ConnectionManager connectionManager;
 
     private final Javalin javalin;
 
     public Server() {
         initializeServer();
-
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                          .post("/user", context -> registerHandler.handle(context))
                          .post("/session", context -> loginHandler.handle(context))
@@ -49,7 +52,12 @@ public class Server {
                          .put("/game", context -> joinGameHandler.handle(context))
                          .delete("/db", context -> clearHandler.handle(context))
                          .delete("/session", context -> logoutHandler.handle(context))
-                         .exception(Exception.class, this::exceptionHandler);
+                         .exception(Exception.class, this::exceptionHandler)
+                         .ws("/ws", ws -> {
+                            ws.onConnect(webSocketHandler);
+                            ws.onMessage(webSocketHandler);
+                            ws.onClose(webSocketHandler);
+                         });
     }
 
     public int run(int desiredPort) {
@@ -96,6 +104,6 @@ public class Server {
         listGamesHandler = new ListGamesHandler(gameService);
         createGameHandler = new CreateGameHandler(gameService);
         joinGameHandler = new JoinGameHandler(gameService);
-
+        webSocketHandler = new WebSocketHandler(gameService);
     }
 }

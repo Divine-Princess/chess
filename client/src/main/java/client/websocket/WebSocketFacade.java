@@ -7,17 +7,18 @@ import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Scanner;
 
 public class WebSocketFacade extends Endpoint implements MessageHandler {
 
     Session session;
     GameHandler gameHandler;
 
-    public WebSocketFacade(String url, GameHandler gameHandler) throws RuntimeException {
+    public void connect(String url, GameHandler gameHandler, String authToken, int gameID) throws RuntimeException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
@@ -29,19 +30,24 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 public void onMessage(String message) {
                     System.out.println(message);
-                    // determine what type of message it is and send it to the appropriate type
+                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                    gameHandler.printMessage(serverMessage);
                 }
             });
+
+            sendCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
 
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
     }
 
-    public void connect() throws RuntimeException {
-        try {
-            
-        }
+    private void sendCommand(UserGameCommand.CommandType commandType,
+                             String authToken, int gameID) throws IOException {
+
+        UserGameCommand command = new UserGameCommand(commandType, authToken, gameID);
+        String json = new Gson().toJson(command);
+        session.getBasicRemote().sendText(json);
     }
 
 

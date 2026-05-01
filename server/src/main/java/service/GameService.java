@@ -105,9 +105,13 @@ public class GameService {
             throw new AlreadyTakenException("Black already taken");
         }
 
-        gameDAO.updateGame(playerColor, gameID, currUsername);
+        gameDAO.updatePlayers(playerColor, gameID, currUsername);
 
         return new JoinGameResult();
+    }
+
+    public ChessGame updateGame(int gameID) {
+
     }
 
     public ClearResult clear() throws DataAccessException {

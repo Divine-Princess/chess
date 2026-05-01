@@ -1,6 +1,8 @@
 package client;
 
 import chess.ChessBoard;
+import client.websocket.GameHandler;
+import client.websocket.WebSocketFacade;
 import model.data.GameData;
 import model.request.*;
 import model.result.ListGamesResult;
@@ -23,14 +25,19 @@ public class ChessClient {
     private final String errorColor = SET_TEXT_COLOR_YELLOW;
     private final String mainColor = SET_TEXT_COLOR_MAGENTA;
     private final String inputColor = SET_TEXT_COLOR_BLUE;
+    private final WebSocketFacade ws = new WebSocketFacade();
+    private final String url;
+    private final GameHandler gameUI = new GameplayUI();
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
+        this.url = url;
     }
 
     private enum State {
         LOGGEDOUT,
-        LOGGEDIN
+        LOGGEDIN,
+        INGAME
     }
 
     public void run() {
@@ -269,8 +276,10 @@ public class ChessClient {
             throw new RuntimeException(errorColor +
                     "Error: Incorrect format. Expected: join [NUMBER] [white/black]" + RESET_TEXT_COLOR);
         }
+
         GameplayUI ui = new GameplayUI();
         String color = params[1].toUpperCase();
+
         if (!(color.equals("WHITE") || color.equals("BLACK"))) {
             throw new RuntimeException(errorColor + "Error: Color must be white or black" + RESET_TEXT_COLOR);
         }
@@ -301,6 +310,8 @@ public class ChessClient {
             ChessBoard board = new ChessBoard();
             board.resetBoard();
             ui.render(board, color);
+
+            ws.connect(url, gameUI, authToken, gameID);
 
             return "";
         }
@@ -378,6 +389,18 @@ public class ChessClient {
                     "♢ help " + mainColor + "🡒 List possible commands\n"
                     + inputColor +
                     "♢ quit " + mainColor + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
+        } else if (state == State.INGAME) {
+            return SET_TEXT_BOLD + mainColor + "  \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
+                    + inputColor + RESET_TEXT_BOLD_FAINT +
+                    "♢ move [CHESS NOTATION] " + mainColor + "🡒 Move chess piece using valid chess notation\n"
+                    + inputColor +
+                    "♢ highlight [CHESS PIECE] " + mainColor + "🡒 Highlight legal moves of single chess piece\n"
+                    + inputColor +
+                    "♢ leave " + mainColor + "🡒 Leave current game\n"
+                    + inputColor +
+                    "♢ resign " + mainColor + "🡒 Forfeit current game\n"
+                    + inputColor +
+                    "♢ help " + mainColor + "🡒 List possible commands\n";
         }
         return SET_TEXT_BOLD + mainColor + "  \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
                 + inputColor + RESET_TEXT_BOLD_FAINT +
