@@ -7,6 +7,7 @@ import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
+import websocket.commands.ConnectCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -18,7 +19,8 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
     Session session;
     GameHandler gameHandler;
 
-    public void connect(String url, GameHandler gameHandler, String authToken, int gameID) throws RuntimeException {
+    public void connect(String url, GameHandler gameHandler,
+                        String authToken, int gameID, String playerColor, String username) throws RuntimeException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
@@ -35,7 +37,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
                 }
             });
 
-            sendCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            sendCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, playerColor, username);
 
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
@@ -43,11 +45,17 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
     }
 
     private void sendCommand(UserGameCommand.CommandType commandType,
-                             String authToken, int gameID) throws IOException {
+                             String authToken, int gameID, String playerColor, String username) throws IOException {
 
-        UserGameCommand command = new UserGameCommand(commandType, authToken, gameID);
-        String json = new Gson().toJson(command);
-        session.getBasicRemote().sendText(json);
+        switch (commandType) {
+            case CONNECT:
+                UserGameCommand command = new ConnectCommand(commandType, authToken, gameID, playerColor, username);
+                String json = new Gson().toJson(command);
+                session.getBasicRemote().sendText(json);
+
+        }
+
+
     }
 
 

@@ -111,9 +111,8 @@ public class GameService {
         return new JoinGameResult();
     }
 
-    public ChessGame getGame(UserGameCommand command) throws DataAccessException {
-        GameData data = gameDAO.getGame(command.getGameID());
-        return data.game();
+    public GameData getGame(UserGameCommand command) throws DataAccessException {
+        return gameDAO.getGame(command.getGameID());
     }
 
 //    public ChessGame updateGame(UserGameCommand command) {

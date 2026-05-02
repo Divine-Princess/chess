@@ -9,18 +9,27 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.data.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.GameService;
+import websocket.commands.ConnectCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
+
+import javax.management.Notification;
+import java.util.HashMap;
 
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final GameService gameService;
     private final ConnectionManager connections = new ConnectionManager();
     private UserGameCommand command;
+    private final HashMap<Session, String> sessionColors = new HashMap<>();
+    private final HashMap<Session, Integer> gameIDs = new HashMap<>();
+    private final HashMap<Session, String> usernames = new HashMap<>();
 
     public WebSocketHandler(GameService gameService) {
         this.gameService = gameService;
@@ -43,7 +52,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (command.getCommandType()) {
-                case CONNECT -> connect(ctx.session);
+                case CONNECT -> connect(ctx);
                 case MAKE_MOVE -> makeMove(ctx.session);
                 case LEAVE -> leave(ctx.session);
                 case RESIGN -> resign(ctx.session);
@@ -54,14 +63,39 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void connect(Session session) throws DataAccessException {
+    private void connect(@NotNull WsMessageContext ctx) throws DataAccessException {
         try {
+            Session session = ctx.session;
+            ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
+            String playerColor = command.getPlayerColor();
+            String username = command.getUsername();
+            sessionColors.put(session, playerColor);
+            usernames.put(session, username);
+
             connections.addSessionToGame(command.getGameID(), session);
-            ChessGame chessGame = gameService.getGame(command);
+            GameData gameData = gameService.getGame(command);
+
+            gameIDs.put(session, gameData.gameID());
+
+            // Send/broadcast loadGameMessage
             LoadGameMessage loadGameMessage =
-                    new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, chessGame);
-            String jsonMessage = new Gson().toJson(loadGameMessage);
-            connections.broadcastMessage(null, jsonMessage, command.getGameID());
+                    new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
+            String jsonLoadGameMessage = new Gson().toJson(loadGameMessage);
+            connections.sendMessage(session, jsonLoadGameMessage);
+
+            String joinedMessage;
+
+            if (sessionColors.get(session) == null) {
+                joinedMessage = username + " joined as observer";
+            }
+            else {
+                joinedMessage = username + " joined as " + playerColor.toLowerCase();
+            }
+
+            ServerMessage notificationMessage =
+                    new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, joinedMessage);
+            joinedMessage = new Gson().toJson(notificationMessage);
+            connections.broadcastMessage(session, joinedMessage, command.getGameID());
 
         }
         catch (Exception ex) {

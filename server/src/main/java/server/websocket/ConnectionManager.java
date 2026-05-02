@@ -40,4 +40,10 @@ public class ConnectionManager {
         }
     }
 
+    public void sendMessage(Session session, String message) throws IOException {
+        if (session.isOpen()) {
+            session.getRemote().sendString(message);
+        }
+    }
+
 }

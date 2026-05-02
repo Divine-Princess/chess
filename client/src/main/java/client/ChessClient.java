@@ -311,7 +311,7 @@ public class ChessClient {
             board.resetBoard();
             ui.render(board, color);
 
-            ws.connect(url, gameUI, authToken, gameID);
+            ws.connect(url, gameUI, authToken, gameID, color, username);
 
             return "";
         }
