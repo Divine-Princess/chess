@@ -24,9 +24,9 @@ public class ConnectionManager {
 
     }
 
-    public Set<Session> getSessionsForGame(int gameID) {
-
-    }
+//    public Set<Session> getSessionsForGame(int gameID) {
+//
+//    }
 
     public void broadcastMessage(Session excludeSession, String message, int gameID) throws IOException {
         var set = gameSessions.getOrDefault(gameID, Set.of());

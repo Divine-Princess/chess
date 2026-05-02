@@ -61,7 +61,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             LoadGameMessage loadGameMessage =
                     new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, chessGame);
             String jsonMessage = new Gson().toJson(loadGameMessage);
-            connections.broadcastMessage(session, jsonMessage, command.getGameID());
+            connections.broadcastMessage(null, jsonMessage, command.getGameID());
+
         }
         catch (Exception ex) {
             throw new DataAccessException("Unable to access game.");

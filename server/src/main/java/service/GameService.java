@@ -116,11 +116,11 @@ public class GameService {
         return data.game();
     }
 
-    public ChessGame updateGame(UserGameCommand command) {
-
-
-
-    }
+//    public ChessGame updateGame(UserGameCommand command) {
+//
+//
+//
+//    }
 
     public ClearResult clear() throws DataAccessException {
         gameDAO.clear();

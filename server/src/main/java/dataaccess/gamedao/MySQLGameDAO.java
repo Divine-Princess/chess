@@ -155,14 +155,10 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     private String serializeChessGame(ChessGame game) {
-        var serializer = new Gson();
-
-        return serializer.toJson(game);
+        return new Gson().toJson(game);
     }
 
     private ChessGame deserializeJson(String json) {
-        var serializer = new Gson();
-
-        return serializer.fromJson(json, ChessGame.class);
+        return new Gson().fromJson(json, ChessGame.class);
     }
 }
