@@ -15,11 +15,13 @@ import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import websocket.commands.ConnectCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import javax.management.Notification;
+import java.io.IOException;
 import java.util.HashMap;
 
 
@@ -63,7 +65,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void connect(@NotNull WsMessageContext ctx) throws DataAccessException {
+    private void connect(@NotNull WsMessageContext ctx) throws DataAccessException, IOException {
         try {
             Session session = ctx.session;
             ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
@@ -73,8 +75,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             usernames.put(session, username);
 
             connections.addSessionToGame(command.getGameID(), session);
-            GameData gameData = gameService.getGame(command);
+            GameData gameData;
 
+            gameData = gameService.getGame(command);
             gameIDs.put(session, gameData.gameID());
 
             // Send/broadcast loadGameMessage
@@ -99,7 +102,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         }
         catch (Exception ex) {
-            throw new DataAccessException("Unable to access game.");
+            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
+            String errorMsgJson = new Gson().toJson(errorMessage);
+            connections.sendMessage(ctx.session, errorMsgJson);
         }
     }
 

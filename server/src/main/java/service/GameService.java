@@ -112,7 +112,18 @@ public class GameService {
     }
 
     public GameData getGame(UserGameCommand command) throws DataAccessException {
-        return gameDAO.getGame(command.getGameID());
+
+        AuthData existingToken = authDAO.getAuth(command.getAuthToken());
+
+        if (existingToken == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+
+        GameData gameData = gameDAO.getGame(command.getGameID());
+        if (gameData == null) {
+            throw new DataAccessException("Error: game does not exist");
+        }
+        return gameData;
     }
 
 //    public ChessGame updateGame(UserGameCommand command) {
