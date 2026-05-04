@@ -1,8 +1,10 @@
 package dataaccess.gamedao;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import model.data.GameData;
 
+import javax.xml.crypto.Data;
 import java.util.Collection;
 
 public interface GameDAO {
@@ -14,6 +16,8 @@ public interface GameDAO {
     Collection<GameData> listGames() throws DataAccessException;
 
     void updatePlayers(String playerColor, int gameID, String username) throws DataAccessException;
+
+    void updateGame(int gameID, ChessGame game) throws DataAccessException;
 
     void clear() throws DataAccessException;
 }

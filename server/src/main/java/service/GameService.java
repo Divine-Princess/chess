@@ -1,6 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataaccess.DataAccessException;
 import dataaccess.authdao.AuthDAO;
 import dataaccess.gamedao.GameDAO;
@@ -16,6 +18,7 @@ import model.result.ListGamesResult;
 import server.AlreadyTakenException;
 import server.BadRequestException;
 import server.UnauthorizedException;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 
 import java.util.*;
@@ -126,11 +129,19 @@ public class GameService {
         return gameData;
     }
 
-//    public ChessGame updateGame(UserGameCommand command) {
-//
-//
-//
-//    }
+    public ChessGame makeMove(MakeMoveCommand command, String color) throws DataAccessException, InvalidMoveException {
+
+        GameData game = getGame(command);
+
+        ChessGame chessGame = game.game();
+
+        ChessMove move = command.getMove();
+
+        chessGame.makeMove(move);
+
+        gameDAO.updateGame(gameID, chessGame);
+
+    }
 
     public ClearResult clear() throws DataAccessException {
         gameDAO.clear();

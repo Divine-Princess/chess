@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseConfigurator;
 import model.data.GameData;
+
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,6 +143,28 @@ public class MySQLGameDAO implements GameDAO {
         }
 
     }
+
+    public void updateGame(int gameID, ChessGame chessGame) throws DataAccessException {
+        String gameJson = serializeChessGame(chessGame);
+        try (Connection conn = db.setupConnection()) {
+            var statement =
+                    """
+                    UPDATE games
+                    SET game = ?
+                    WHERE gameID = ?
+                    """;
+
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                ps.setString(2, gameJson);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to update game");
+        }
+
+    }
+
 
     @Override
     public void clear() throws DataAccessException {

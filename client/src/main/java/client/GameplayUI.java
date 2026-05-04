@@ -5,6 +5,10 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import client.websocket.GameHandler;
+import com.google.gson.Gson;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import static ui.EscapeSequences.*;
@@ -13,16 +17,17 @@ public class GameplayUI implements GameHandler {
 
     private final String sideBg = SET_BG_COLOR_DARK_GREY;
     private final String sideText = SET_TEXT_COLOR_MAGENTA;
+    private String color;
 
 
-    public void render(ChessBoard board, String color) {
+    public void render(ChessBoard board) {
         int step;
         int start;
         int end;
-        String whiteSquare;
-        String blackSquare;
+//        String whiteSquare;
+//        String blackSquare;
 
-        if (color.equalsIgnoreCase("WHITE")) {
+        if (color == null || color.equalsIgnoreCase("WHITE")) {
             whiteSide();
             step = 1;
             start = 1;
@@ -76,7 +81,7 @@ public class GameplayUI implements GameHandler {
             System.out.print(sideBg + sideText + " " +
                     (9-i) + " " + RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         }
-        if (color.equalsIgnoreCase("WHITE")) { whiteSide();} else { blackSide(); }
+        if (color == null || color.equalsIgnoreCase("WHITE")) { whiteSide();} else { blackSide(); }
     }
 
 
@@ -96,11 +101,23 @@ public class GameplayUI implements GameHandler {
 
     @Override
     public void updateGame(ChessGame game) {
-
+        render(game.getBoard());
     }
 
     @Override
-    public void printMessage(ServerMessage message) {
+    public void printMessage(String message, String playerColor) {
+        ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+        this.color = playerColor;
+        if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+           LoadGameMessage toPrint = new Gson().fromJson(message, LoadGameMessage.class);
+           updateGame(toPrint.getGame());
+        } else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            NotificationMessage toPrint = new Gson().fromJson(message, NotificationMessage.class);
+            System.out.println(toPrint.getMessage());
+        } else {
+            ErrorMessage toPrint = new Gson().fromJson(message, ErrorMessage.class);
+            System.out.println(toPrint.getMessage());
+        }
 
     }
 }

@@ -14,6 +14,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import websocket.commands.ConnectCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -55,7 +56,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx);
-                case MAKE_MOVE -> makeMove(ctx.session);
+                case MAKE_MOVE -> makeMove(ctx);
                 case LEAVE -> leave(ctx.session);
                 case RESIGN -> resign(ctx.session);
             }
@@ -65,7 +66,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void connect(@NotNull WsMessageContext ctx) throws DataAccessException, IOException {
+    private void connect(@NotNull WsMessageContext ctx) throws IOException {
         try {
             Session session = ctx.session;
             ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
@@ -75,9 +76,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             usernames.put(session, username);
 
             connections.addSessionToGame(command.getGameID(), session);
-            GameData gameData;
-
-            gameData = gameService.getGame(command);
+            GameData gameData = gameService.getGame(command);
             gameIDs.put(session, gameData.gameID());
 
             // Send/broadcast loadGameMessage
@@ -108,7 +107,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void makeMove(Session session) {
+    private void makeMove(@NotNull WsMessageContext ctx) throws IOException {
+        MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+
+        String username = usernames.get(ctx.session);
+        String color = sessionColors.get(ctx.session);
+
+        if (color == null) {
+            connections.sendMessage(ctx.session, "Error: Observers cannot make moves");
+        }
+
+        try {
+            ChessGame
+        }
+
         // LOAD GAME
         // NOTIFICATION
     }

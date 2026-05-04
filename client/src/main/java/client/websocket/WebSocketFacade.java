@@ -1,5 +1,6 @@
 package client.websocket;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.Endpoint;
@@ -8,7 +9,11 @@ import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
 import websocket.commands.ConnectCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -31,28 +36,42 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
 
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 public void onMessage(String message) {
-                    System.out.println(message);
-                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                    gameHandler.printMessage(serverMessage);
+                    gameHandler.printMessage(message, playerColor);
                 }
             });
 
-            sendCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, playerColor, username);
+            sendCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, playerColor, username, null);
 
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
     }
 
+    public void makeMove(ChessMove move, String authToken, int gameID) {
+        try {
+            sendCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, null, null, move);
+        }
+        catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
     private void sendCommand(UserGameCommand.CommandType commandType,
-                             String authToken, int gameID, String playerColor, String username) throws IOException {
+                             String authToken, int gameID,
+                             String playerColor, String username,
+                             ChessMove move) throws IOException {
 
         switch (commandType) {
             case CONNECT:
-                UserGameCommand command = new ConnectCommand(commandType, authToken, gameID, playerColor, username);
-                String json = new Gson().toJson(command);
-                session.getBasicRemote().sendText(json);
-
+                UserGameCommand connectCommand = new ConnectCommand(commandType, authToken, gameID, playerColor, username);
+                String connectJson = new Gson().toJson(connectCommand);
+                session.getBasicRemote().sendText(connectJson);
+                break;
+            case MAKE_MOVE:
+                UserGameCommand makeMoveCommand = new MakeMoveCommand(commandType, authToken, gameID, move);
+                String makeMoveJson = new Gson().toJson(makeMoveCommand);
+                session.getBasicRemote().sendText(makeMoveJson);
+                break;
         }
 
 

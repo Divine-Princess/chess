@@ -1,6 +1,8 @@
 package client;
 
 import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPosition;
 import client.websocket.GameHandler;
 import client.websocket.WebSocketFacade;
 import model.data.GameData;
@@ -28,6 +30,7 @@ public class ChessClient {
     private final WebSocketFacade ws = new WebSocketFacade();
     private final String url;
     private final GameHandler gameUI = new GameplayUI();
+    private int currentGameID;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -49,12 +52,14 @@ public class ChessClient {
         String command = "";
 
         while (!command.equals("quit")) {
-            prompt();
+            if (!(state == State.INGAME)) {
+                prompt();
+            }
             String input = scanner.nextLine();
 
             try {
                 command = getCommand(input);
-                if (!(command.isEmpty())) { padding(); }
+                if (!command.isEmpty()) { padding(); }
                 if (!(command.equals("quit"))) { System.out.print(command); }
             } catch (Throwable ex) {
                 var message = ex.toString();
@@ -91,6 +96,11 @@ public class ChessClient {
                 case "join" -> joinGame(parameters);
                 case "observe" -> observeGame(parameters);
                 case "logout" -> logout();
+                case "move" -> move(parameters);
+                case "highlight" -> highlight();
+                case "leave" -> leave();
+                case "resign" -> resign();
+                case "redraw" -> redraw();
                 case "quit" -> "quit";
                 // TODO! REMOVE AFTER TESTING!!!
                 case "clear" -> clear();
@@ -277,7 +287,6 @@ public class ChessClient {
                     "Error: Incorrect format. Expected: join [NUMBER] [white/black]" + RESET_TEXT_COLOR);
         }
 
-        GameplayUI ui = new GameplayUI();
         String color = params[1].toUpperCase();
 
         if (!(color.equals("WHITE") || color.equals("BLACK"))) {
@@ -301,17 +310,14 @@ public class ChessClient {
             throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
         }
 
-        int gameID = games.get(gameNum);
+        currentGameID = games.get(gameNum);
 
         try {
-            JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, color, gameID);
+            JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, color, currentGameID);
             server.joinGame(joinGameRequest);
 
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-            ui.render(board, color);
-
-            ws.connect(url, gameUI, authToken, gameID, color, username);
+            ws.connect(url, gameUI, authToken, currentGameID, color, username);
+            state = State.INGAME;
 
             return "";
         }
@@ -327,7 +333,6 @@ public class ChessClient {
             throw new RuntimeException(errorColor +
                     "Error: Incorrect format. Expected: observe [NUMBER]" + RESET_TEXT_COLOR);
         }
-        GameplayUI ui = new GameplayUI();
 
         if (games == null || games.isEmpty()) {
             throw new RuntimeException(errorColor +
@@ -340,9 +345,11 @@ public class ChessClient {
                 throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
             }
 
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-            ui.render(board, "WHITE");
+            int gameID = games.get(gameNum);
+
+            System.out.print("\n");
+            ws.connect(url, gameUI, authToken, gameID, null, username);
+            state = State.INGAME;
 
             return "";
 
@@ -379,6 +386,49 @@ public class ChessClient {
 
     }
 
+    private String move(String[] moves) {
+        checkLoggedIn();
+        if (!(moves.length == 2)) {
+            throw new RuntimeException(errorColor +
+                    "Error: Incorrect format. Expected: move [START SPACE] [END SPACE]" + RESET_TEXT_COLOR);
+        }
+
+        String start = moves[0];
+        String end = moves[1];
+
+        ChessPosition startPos = parsePosition(start);
+        ChessPosition endPos = parsePosition(end);
+
+        ChessMove move = new ChessMove(startPos, endPos, null);
+
+        ws.makeMove(move, authToken, currentGameID);
+
+        return "";
+    }
+
+    private ChessPosition parsePosition(String move) {
+        int col = move.charAt(0) - 'a' + 1;
+        int row = move.charAt(1) - '0';
+        return new ChessPosition(row, col);
+    }
+
+    private String highlight() {
+        return "";
+    }
+
+    private String leave() {
+        currentGameID = 0;
+        return "";
+    }
+
+    private String resign() {
+        return "";
+    }
+
+    private String redraw() {
+        return "";
+    }
+
     private String help() {
         if (state == State.LOGGEDOUT) {
             return SET_TEXT_BOLD + mainColor + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
@@ -392,13 +442,16 @@ public class ChessClient {
         } else if (state == State.INGAME) {
             return SET_TEXT_BOLD + mainColor + "  \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
                     + inputColor + RESET_TEXT_BOLD_FAINT +
-                    "♢ move [CHESS NOTATION] " + mainColor + "🡒 Move chess piece using valid chess notation\n"
+                    "♢ move [COL/ROW] [COL/ROW] " + mainColor + "🡒 Move chess piece using valid moves. " +
+                    "Ex. move b3 f7 \n"
                     + inputColor +
                     "♢ highlight [CHESS PIECE] " + mainColor + "🡒 Highlight legal moves of single chess piece\n"
                     + inputColor +
                     "♢ leave " + mainColor + "🡒 Leave current game\n"
                     + inputColor +
                     "♢ resign " + mainColor + "🡒 Forfeit current game\n"
+                    + inputColor +
+                    "♢ redraw " + mainColor + "🡒 Redraw chessboard\n"
                     + inputColor +
                     "♢ help " + mainColor + "🡒 List possible commands\n";
         }
@@ -427,6 +480,7 @@ public class ChessClient {
             this.authToken = null;
             this.username = null;
             this.state = State.LOGGEDOUT;
+            this.currentGameID = 0;
             return "Server Cleared";
         }
         catch (Exception ex) {

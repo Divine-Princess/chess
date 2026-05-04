@@ -1,5 +1,7 @@
 package dataaccess.gamedao;
 
+import chess.ChessGame;
+import dataaccess.DataAccessException;
 import model.data.GameData;
 
 import java.util.Collection;
@@ -44,6 +46,11 @@ public class MemoryGameDAO implements GameDAO{
         GameData updatedGame = new GameData(game.gameID(), whiteUsername, blackUsername, game.gameName(), game.game());
 
         this.game.put(gameID, updatedGame);
+    }
+
+    @Override
+    public void updateGame(int gameID, ChessGame game) throws DataAccessException {
+
     }
 
     @Override
