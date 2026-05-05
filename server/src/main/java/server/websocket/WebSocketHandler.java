@@ -118,21 +118,61 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
 
         String username = usernames.get(ctx.session);
+        String color = sessionColors.get(ctx.session);
+        ChessGame.TeamColor teamColor = null;
+        ChessGame.TeamColor otherTeamColor = null;
+
+        if (color != null) {
+            if (color.equalsIgnoreCase("WHITE")) {
+                teamColor = ChessGame.TeamColor.WHITE;
+                otherTeamColor = ChessGame.TeamColor.BLACK;
+            }
+            else if (color.equalsIgnoreCase("BLACK")) {
+                teamColor = ChessGame.TeamColor.BLACK;
+                otherTeamColor = ChessGame.TeamColor.WHITE;
+            }
+        }
 
         String moveStr = deserializeMove(makeMoveCommand.getMove());
 
         try {
-            ChessGame game = gameService.makeMove(makeMoveCommand);
+            GameData gameData = gameService.makeMove(makeMoveCommand);
+            ChessGame game = gameData.game();
+            String otherUser;
+            if (teamColor == null) {
+                otherUser = null;
+            }
+            else if (teamColor == ChessGame.TeamColor.WHITE) {
+                otherUser = gameData.blackUsername();
+            } else {
+                otherUser = gameData.whiteUsername();
+            }
 
             LoadGameMessage loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
             String jsonLoadGameMessage = new Gson().toJson(loadGameMessage);
             connections.broadcastMessage(null, jsonLoadGameMessage, command.getGameID());
 
-            String movedMessage = username + " made the move " + moveStr;
-            ServerMessage notificationMessage =
-                    new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, movedMessage);
-            movedMessage = new Gson().toJson(notificationMessage);
-            connections.broadcastMessage(ctx.session, movedMessage, command.getGameID());
+            broadcastNotificationMessage(username + " made the move " + moveStr, ctx.session);
+
+            if (game.isInCheckmate(otherTeamColor)) {
+                broadcastNotificationMessage(otherUser + "is in checkmate!", null);
+            }
+            else if (game.isInCheck(otherTeamColor)) {
+                broadcastNotificationMessage(otherUser + "is in check!", null);
+            }
+            else if (game.isInStalemate(otherTeamColor)) {
+                broadcastNotificationMessage(otherUser + "is in stalemate!", null);
+            }
+            else if (game.isInCheckmate(teamColor)) {
+                broadcastNotificationMessage(username + "is in checkmate!", null);
+            }
+            else if (game.isInCheck(teamColor)) {
+                broadcastNotificationMessage(username + "is in check!", null);
+            }
+            else if (game.isInStalemate(teamColor)) {
+                broadcastNotificationMessage(username + "is in stalemate!", null);
+            }
+
 
         } catch (Exception ex) {
             ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
@@ -142,6 +182,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         // LOAD GAME
         // NOTIFICATION
+    }
+
+    private void broadcastNotificationMessage(String message, Session exclude) throws IOException {
+        ServerMessage notificationMessage =
+                new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        String jsonMessage = new Gson().toJson(notificationMessage);
+        connections.broadcastMessage(exclude, jsonMessage, command.getGameID());
     }
 
     private String deserializeMove(ChessMove move) {

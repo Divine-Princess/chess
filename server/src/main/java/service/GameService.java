@@ -130,7 +130,7 @@ public class GameService {
         return gameData;
     }
 
-    public ChessGame makeMove(MakeMoveCommand command) throws DataAccessException, InvalidMoveException {
+    public GameData makeMove(MakeMoveCommand command) throws DataAccessException, InvalidMoveException {
 
         GameData game = getGame(command);
 
@@ -152,7 +152,7 @@ public class GameService {
 
         gameDAO.updateGame(command.getGameID(), chessGame);
 
-        return chessGame;
+        return game;
     }
 
     @NotNull
