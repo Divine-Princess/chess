@@ -200,7 +200,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         char charEndCol = (char)('a' + (endCol - 1));
         char charStartCol = (char)('a' + (startCol - 1));
 
-        return charStartCol + startRow + " " + charEndCol + endRow;
+        return charStartCol + "" + startRow + " " + charEndCol + endRow;
     }
 
     private void leave(Session session) {
