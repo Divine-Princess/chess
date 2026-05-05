@@ -15,6 +15,7 @@ import model.result.ClearResult;
 import model.result.CreateGameResult;
 import model.result.JoinGameResult;
 import model.result.ListGamesResult;
+import org.jetbrains.annotations.NotNull;
 import server.AlreadyTakenException;
 import server.BadRequestException;
 import server.UnauthorizedException;
@@ -129,18 +130,54 @@ public class GameService {
         return gameData;
     }
 
-    public ChessGame makeMove(MakeMoveCommand command, String color) throws DataAccessException, InvalidMoveException {
+    public ChessGame makeMove(MakeMoveCommand command) throws DataAccessException, InvalidMoveException {
 
         GameData game = getGame(command);
 
+        String currentUser = authDAO.getAuth(command.getAuthToken()).username();
+
+        String color = null;
+        if (currentUser.equals(game.whiteUsername())) {
+            color = "WHITE";
+        } else if (currentUser.equals(game.blackUsername())) {
+            color = "BLACK";
+        }
+
+        if (!currentUser.equalsIgnoreCase(game.blackUsername())
+                && !currentUser.equalsIgnoreCase(game.whiteUsername())) {
+            throw new InvalidMoveException("Observers cannot make moves");
+        }
+
+        ChessGame chessGame = getChessGame(command, game, color);
+
+        gameDAO.updateGame(command.getGameID(), chessGame);
+
+        return chessGame;
+    }
+
+    @NotNull
+    private static ChessGame getChessGame(MakeMoveCommand command,
+                                          GameData game, String color) throws InvalidMoveException {
         ChessGame chessGame = game.game();
+
+        if (chessGame.getTeamTurn() == ChessGame.TeamColor.WHITE) {
+            assert color != null;
+            if (!color.equals("WHITE")) {
+                throw new InvalidMoveException("Not your turn");
+            }
+        }
+
+        if (chessGame.getTeamTurn() == ChessGame.TeamColor.BLACK) {
+            assert color != null;
+            if (!color.equals("BLACK")) {
+                throw new InvalidMoveException("Not your turn");
+            }
+        }
 
         ChessMove move = command.getMove();
 
         chessGame.makeMove(move);
-
-        gameDAO.updateGame(gameID, chessGame);
-
+        return chessGame;
     }
 
     public ClearResult clear() throws DataAccessException {

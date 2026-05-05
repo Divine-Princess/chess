@@ -155,8 +155,8 @@ public class MySQLGameDAO implements GameDAO {
                     """;
 
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setInt(1, gameID);
-                ps.setString(2, gameJson);
+                ps.setString(1, gameJson);
+                ps.setInt(2, gameID);
                 ps.executeUpdate();
             }
         } catch (SQLException e) {

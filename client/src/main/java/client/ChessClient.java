@@ -31,6 +31,7 @@ public class ChessClient {
     private final String url;
     private final GameHandler gameUI = new GameplayUI();
     private int currentGameID;
+    private String playerColor;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -287,9 +288,9 @@ public class ChessClient {
                     "Error: Incorrect format. Expected: join [NUMBER] [white/black]" + RESET_TEXT_COLOR);
         }
 
-        String color = params[1].toUpperCase();
+        playerColor = params[1].toUpperCase();
 
-        if (!(color.equals("WHITE") || color.equals("BLACK"))) {
+        if (!(playerColor.equals("WHITE") || playerColor.equals("BLACK"))) {
             throw new RuntimeException(errorColor + "Error: Color must be white or black" + RESET_TEXT_COLOR);
         }
 
@@ -313,10 +314,10 @@ public class ChessClient {
         currentGameID = games.get(gameNum);
 
         try {
-            JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, color, currentGameID);
+            JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, playerColor, currentGameID);
             server.joinGame(joinGameRequest);
 
-            ws.connect(url, gameUI, authToken, currentGameID, color, username);
+            ws.connect(url, gameUI, authToken, currentGameID, playerColor, username);
             state = State.INGAME;
 
             return "";
@@ -348,7 +349,7 @@ public class ChessClient {
             int gameID = games.get(gameNum);
 
             System.out.print("\n");
-            ws.connect(url, gameUI, authToken, gameID, null, username);
+            ws.connect(url, gameUI, authToken, gameID, playerColor, username);
             state = State.INGAME;
 
             return "";

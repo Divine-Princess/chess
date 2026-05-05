@@ -104,6 +104,6 @@ public class Server {
         listGamesHandler = new ListGamesHandler(gameService);
         createGameHandler = new CreateGameHandler(gameService);
         joinGameHandler = new JoinGameHandler(gameService);
-        webSocketHandler = new WebSocketHandler(gameService);
+        webSocketHandler = new WebSocketHandler(gameService, authService);
     }
 }

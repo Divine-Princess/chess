@@ -8,13 +8,8 @@ import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
-import websocket.commands.ConnectCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -40,7 +35,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
                 }
             });
 
-            sendCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, playerColor, username, null);
+            sendCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID,null);
 
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
@@ -49,7 +44,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
 
     public void makeMove(ChessMove move, String authToken, int gameID) {
         try {
-            sendCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, null, null, move);
+            sendCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move);
         }
         catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
@@ -57,18 +52,17 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
     }
 
     private void sendCommand(UserGameCommand.CommandType commandType,
-                             String authToken, int gameID,
-                             String playerColor, String username,
-                             ChessMove move) throws IOException {
+                             String authToken, int gameID, ChessMove move) throws IOException {
 
         switch (commandType) {
             case CONNECT:
-                UserGameCommand connectCommand = new ConnectCommand(commandType, authToken, gameID, playerColor, username);
+                UserGameCommand connectCommand = new UserGameCommand(commandType, authToken, gameID);
                 String connectJson = new Gson().toJson(connectCommand);
                 session.getBasicRemote().sendText(connectJson);
                 break;
             case MAKE_MOVE:
-                UserGameCommand makeMoveCommand = new MakeMoveCommand(commandType, authToken, gameID, move);
+                UserGameCommand makeMoveCommand =
+                        new MakeMoveCommand(commandType, authToken, gameID, move);
                 String makeMoveJson = new Gson().toJson(makeMoveCommand);
                 session.getBasicRemote().sendText(makeMoveJson);
                 break;
