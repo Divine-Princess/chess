@@ -155,22 +155,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             broadcastNotificationMessage(username + " made the move " + moveStr, ctx.session);
 
             if (game.isInCheckmate(otherTeamColor)) {
-                broadcastNotificationMessage(otherUser + "is in checkmate!", null);
+                broadcastNotificationMessage(otherUser + " is in checkmate!", null);
             }
             else if (game.isInCheck(otherTeamColor)) {
-                broadcastNotificationMessage(otherUser + "is in check!", null);
+                broadcastNotificationMessage(otherUser + " is in check!", null);
             }
             else if (game.isInStalemate(otherTeamColor)) {
-                broadcastNotificationMessage(otherUser + "is in stalemate!", null);
+                broadcastNotificationMessage(otherUser + " is in stalemate!", null);
             }
             else if (game.isInCheckmate(teamColor)) {
-                broadcastNotificationMessage(username + "is in checkmate!", null);
+                broadcastNotificationMessage(username + " is in checkmate!", null);
             }
             else if (game.isInCheck(teamColor)) {
-                broadcastNotificationMessage(username + "is in check!", null);
+                broadcastNotificationMessage(username + " is in check!", null);
             }
             else if (game.isInStalemate(teamColor)) {
-                broadcastNotificationMessage(username + "is in stalemate!", null);
+                broadcastNotificationMessage(username + " is in stalemate!", null);
             }
 
 
@@ -203,7 +203,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return charStartCol + "" + startRow + " " + charEndCol + endRow;
     }
 
-    private void leave(Session session) {
+    private void leave(@NotNull WsMessageContext ctx) throws IOException {
+        String username = usernames.get(ctx.session);
+
+        UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+
+        broadcastNotificationMessage(username + " has left the game.", ctx.session);
+
+
         // STOP SENDING MESSAGES
     }
 

@@ -98,7 +98,8 @@ public class ChessClient {
                 case "observe" -> observeGame(parameters);
                 case "logout" -> logout();
                 case "move" -> move(parameters);
-                case "highlight" -> highlight();
+                case "highlight" -> highlight(parameters);
+                case "hl" -> highlight(parameters);
                 case "leave" -> leave();
                 case "resign" -> resign();
                 case "redraw" -> redraw();
@@ -388,10 +389,11 @@ public class ChessClient {
     }
 
     private String move(String[] moves) {
-        checkLoggedIn();
+        checkInGame();
         if (!(moves.length == 2)) {
             throw new RuntimeException(errorColor +
-                    "Error: Incorrect format. Expected: move [START SPACE] [END SPACE]" + RESET_TEXT_COLOR);
+                    "Error: Incorrect format. Expected: move [START SPACE] [END SPACE] ex. move e3 e5"
+                    + RESET_TEXT_COLOR);
         }
 
         String start = moves[0];
@@ -413,20 +415,37 @@ public class ChessClient {
         return new ChessPosition(row, col);
     }
 
-    private String highlight() {
+    private String highlight(String[] space) {
+        checkInGame();
+        // TODO: GET LEGAL MOVES, SEND TO UI. CHANGE COLOR
+        if (!(space.length == 1)) {
+            throw new RuntimeException(errorColor +
+                    "Error: Incorrect format. Expected: highlight [COL/ROW] ex. highlight e3" + RESET_TEXT_COLOR);
+        }
+
+        gameUI.highlightMoves(parsePosition(space[0]));
+
         return "";
     }
 
     private String leave() {
+        checkInGame();
+        ws.leave(authToken, currentGameID);
         currentGameID = 0;
+        state = State.LOGGEDIN;
+        help();
         return "";
     }
 
     private String resign() {
+        checkInGame();
         return "";
     }
 
     private String redraw() {
+        checkInGame();
+        gameUI.redraw();
+
         return "";
     }
 
@@ -446,7 +465,7 @@ public class ChessClient {
                     "♢ move [COL/ROW] [COL/ROW] " + mainColor + "🡒 Move chess piece using valid moves. " +
                     "Ex. move b3 f7 \n"
                     + inputColor +
-                    "♢ highlight [CHESS PIECE] " + mainColor + "🡒 Highlight legal moves of single chess piece\n"
+                    "♢ highlight (or hl) [COL/ROW] " + mainColor + "🡒 Highlight legal moves of single chess piece\n"
                     + inputColor +
                     "♢ leave " + mainColor + "🡒 Leave current game\n"
                     + inputColor +
@@ -494,6 +513,16 @@ public class ChessClient {
         if (state == State.LOGGEDOUT) {
             throw new RuntimeException(errorColor + "Error: Must be signed in to perform this action"
             + RESET_TEXT_COLOR);
+        } else if (state == State.INGAME) {
+            throw new RuntimeException(errorColor + "Error: Must be out of game to perform this action"
+            + RESET_TEXT_COLOR);
+        }
+    }
+
+    private void checkInGame() throws RuntimeException {
+        if (state == State.LOGGEDOUT || state == State.LOGGEDIN) {
+            throw new RuntimeException(errorColor + "Error: Must be in game to perform this action"
+                    + RESET_TEXT_COLOR);
         }
     }
 }

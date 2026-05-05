@@ -1,15 +1,16 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import client.websocket.GameHandler;
 import com.google.gson.Gson;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static ui.EscapeSequences.*;
 
@@ -18,9 +19,10 @@ public class GameplayUI implements GameHandler {
     private final String sideBg = SET_BG_COLOR_DARK_GREY;
     private final String sideText = SET_TEXT_COLOR_MAGENTA;
     private String color;
+    private ChessGame currentGame;
 
 
-    public void render(ChessBoard board) {
+    private void render(ChessBoard board, Collection<ChessPosition> legalMoves, ChessPosition currPos) {
         int rowStep;
         int rowStart;
         int rowEnd;
@@ -60,9 +62,19 @@ public class GameplayUI implements GameHandler {
 
                 if ((i + j) % 2 == 0) {
                     bgColor = SET_BG_COLOR_BLACK;
+                    if (legalMoves.contains(pos)) {
+                        bgColor = SET_BG_COLOR_DARK_GREEN;
+                    } else if (pos.equals(currPos)) {
+                        bgColor = SET_BG_COLOR_WHITE;
+                    }
                 }
                 else {
                     bgColor = SET_BG_COLOR_LIGHT_GREY;
+                    if (legalMoves.contains(pos)) {
+                        bgColor = SET_BG_COLOR_GREEN;
+                    } else if (pos.equals(currPos)) {
+                        bgColor = SET_BG_COLOR_WHITE;
+                    }
                 }
 
                 if (piece == null) {
@@ -108,7 +120,28 @@ public class GameplayUI implements GameHandler {
 
     @Override
     public void updateGame(ChessGame game) {
-        render(game.getBoard());
+        this.currentGame = game;
+
+        render(game.getBoard(), new ArrayList<>(), null);
+    }
+
+    @Override
+    public void highlightMoves(ChessPosition position) {
+
+        Collection<ChessMove> legalMoves = currentGame.validMoves(position);
+
+        List<ChessPosition> endPos = new ArrayList<>();
+
+        for (ChessMove move : legalMoves) {
+            endPos.add(move.getEndPosition());
+        }
+
+        render(currentGame.getBoard(), endPos, position);
+    }
+
+    @Override
+    public void redraw() {
+        render(currentGame.getBoard(), new ArrayList<>(), null);
     }
 
     @Override

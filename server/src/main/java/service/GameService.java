@@ -180,6 +180,8 @@ public class GameService {
         return chessGame;
     }
 
+
+
     public ClearResult clear() throws DataAccessException {
         gameDAO.clear();
         return new ClearResult();
