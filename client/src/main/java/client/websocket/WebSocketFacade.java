@@ -60,14 +60,23 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
         }
     }
 
+    public void resign(String authToken, int gameID) {
+        try {
+            sendCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID, null);
+        }
+        catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
     private void sendCommand(UserGameCommand.CommandType commandType,
                              String authToken, int gameID, ChessMove move) throws IOException {
 
         switch (commandType) {
-            case CONNECT, LEAVE:
-                UserGameCommand connectCommand = new UserGameCommand(commandType, authToken, gameID);
-                String connectJson = new Gson().toJson(connectCommand);
-                session.getBasicRemote().sendText(connectJson);
+            case CONNECT, LEAVE, RESIGN:
+                UserGameCommand command = new UserGameCommand(commandType, authToken, gameID);
+                String json = new Gson().toJson(command);
+                session.getBasicRemote().sendText(json);
                 break;
             case MAKE_MOVE:
                 UserGameCommand makeMoveCommand =

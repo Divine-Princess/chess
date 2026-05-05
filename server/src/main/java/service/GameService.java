@@ -28,6 +28,7 @@ public class GameService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
     private int gameID = 1;
+    private final Set<Integer> finishedGames = new HashSet<>();
 
     public GameService(GameDAO gameDAO, AuthDAO authDAO) {
         this.gameDAO = gameDAO;
@@ -197,6 +198,27 @@ public class GameService {
         }
 
         gameDAO.updatePlayers(color, command.getGameID(), null);
+    }
+
+    public void resign(UserGameCommand command) throws DataAccessException {
+        GameData game = getGame(command);
+
+        String currentUser = authDAO.getAuth(command.getAuthToken()).username();
+
+        if (!currentUser.equalsIgnoreCase(game.blackUsername())
+                && !currentUser.equalsIgnoreCase(game.whiteUsername())) {
+            throw new RuntimeException("Observers cannot resign.");
+        }
+
+        gameDAO.updateGame(command.getGameID(), game.game());
+    }
+
+    public void setGameOver(UserGameCommand command) {
+        finishedGames.add(command.getGameID());
+    }
+
+    public boolean checkGameOver(UserGameCommand command) {
+        return finishedGames.contains(command.getGameID());
     }
 
     public ClearResult clear() throws DataAccessException {

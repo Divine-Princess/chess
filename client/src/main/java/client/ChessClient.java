@@ -433,12 +433,13 @@ public class ChessClient {
         ws.leave(authToken, currentGameID);
         currentGameID = 0;
         state = State.LOGGEDIN;
-        help();
+        System.out.println(help());
         return "";
     }
 
     private String resign() {
         checkInGame();
+        ws.resign(authToken, currentGameID);
         return "";
     }
 

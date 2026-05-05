@@ -33,7 +33,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final HashMap<Session, String> sessionColors = new HashMap<>();
     private final HashMap<Session, Integer> gameIDs = new HashMap<>();
     private final HashMap<Session, String> usernames = new HashMap<>();
-    private boolean gameOver = false;
 
     public WebSocketHandler(GameService gameService, AuthService authService) {
         this.gameService = gameService;
@@ -117,14 +116,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(@NotNull WsMessageContext ctx) throws IOException {
-        if (gameOver) {
+
+        MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+
+        if (gameService.checkGameOver(makeMoveCommand)) {
             ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
                     "Game is over");
             String errorMsgJson = new Gson().toJson(errorMessage);
             connections.sendMessage(ctx.session, errorMsgJson);
+            return;
         }
-
-        MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
 
         String username = usernames.get(ctx.session);
         String color = sessionColors.get(ctx.session);
@@ -164,26 +165,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             broadcastNotificationMessage(username + " made the move " + moveStr, ctx.session);
 
             if (game.isInCheckmate(otherTeamColor)) {
-                broadcastNotificationMessage(otherUser + " is in checkmate!", null);
-                gameOver = true;
+                broadcastNotificationMessage(otherUser + " is in checkmate! \n Game Over.", null);
+                gameService.setGameOver(command);
             }
             else if (game.isInCheck(otherTeamColor)) {
                 broadcastNotificationMessage(otherUser + " is in check!", null);
             }
             else if (game.isInStalemate(otherTeamColor)) {
-                broadcastNotificationMessage(otherUser + " is in stalemate!", null);
-                gameOver = true;
+                broadcastNotificationMessage(otherUser + " is in stalemate! \n Game Over.", null);
+                gameService.setGameOver(command);
             }
             else if (game.isInCheckmate(teamColor)) {
-                broadcastNotificationMessage(username + " is in checkmate!", null);
-                gameOver = true;
+                broadcastNotificationMessage(username + " is in checkmate! \n Game Over.", null);
+                gameService.setGameOver(command);
             }
             else if (game.isInCheck(teamColor)) {
                 broadcastNotificationMessage(username + " is in check!", null);
             }
             else if (game.isInStalemate(teamColor)) {
-                broadcastNotificationMessage(username + " is in stalemate!", null);
-                gameOver = true;
+                broadcastNotificationMessage(username + " is in stalemate! \n Game Over.", null);
+                gameService.setGameOver(command);
             }
 
 
@@ -215,8 +216,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String errorMsgJson = new Gson().toJson(errorMessage);
             connections.sendMessage(ctx.session, errorMsgJson);
         }
-
-        // STOP SENDING MESSAGES
     }
 
     private void broadcastNotificationMessage(String message, Session exclude) throws IOException {
@@ -239,12 +238,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
 
-    private void resign(@NotNull WsMessageContext ctx) {
+    private void resign(@NotNull WsMessageContext ctx) throws IOException {
+        String username = usernames.get(ctx.session);
 
+        UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
 
+        if (gameService.checkGameOver(command)) {
+            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                    "Game is over");
+            String errorMsgJson = new Gson().toJson(errorMessage);
+            connections.sendMessage(ctx.session, errorMsgJson);
+            return;
+        }
 
+        try {
+            gameService.resign(command);
+            broadcastNotificationMessage(username + " has resigned. \nGame Over.", null);
 
-        gameOver = true;
+            gameService.setGameOver(command);
+
+        } catch (Exception ex) {
+            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
+            String errorMsgJson = new Gson().toJson(errorMessage);
+            connections.sendMessage(ctx.session, errorMsgJson);
+        }
+
         // NO MOVES CAN BE MADE
     }
 
