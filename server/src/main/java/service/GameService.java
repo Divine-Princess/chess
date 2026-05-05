@@ -181,6 +181,23 @@ public class GameService {
     }
 
 
+    public void removePlayer(UserGameCommand command) throws DataAccessException {
+
+        GameData game = getGame(command);
+
+        String currentUser = authDAO.getAuth(command.getAuthToken()).username();
+
+        String color = null;
+        if (currentUser.equals(game.whiteUsername())) {
+            color = "WHITE";
+        } else if (currentUser.equals(game.blackUsername())) {
+            color = "BLACK";
+        } else {
+            return;
+        }
+
+        gameDAO.updatePlayers(color, command.getGameID(), null);
+    }
 
     public ClearResult clear() throws DataAccessException {
         gameDAO.clear();

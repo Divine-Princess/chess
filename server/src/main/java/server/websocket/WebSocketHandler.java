@@ -33,6 +33,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final HashMap<Session, String> sessionColors = new HashMap<>();
     private final HashMap<Session, Integer> gameIDs = new HashMap<>();
     private final HashMap<Session, String> usernames = new HashMap<>();
+    private boolean gameOver = false;
 
     public WebSocketHandler(GameService gameService, AuthService authService) {
         this.gameService = gameService;
@@ -53,13 +54,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
+
         try {
             command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx);
                 case MAKE_MOVE -> makeMove(ctx);
-                case LEAVE -> leave(ctx.session);
-                case RESIGN -> resign(ctx.session);
+                case LEAVE -> leave(ctx);
+                case RESIGN -> resign(ctx);
             }
 
         } catch (Exception ex) {
@@ -115,6 +117,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(@NotNull WsMessageContext ctx) throws IOException {
+        if (gameOver) {
+            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                    "Game is over");
+            String errorMsgJson = new Gson().toJson(errorMessage);
+            connections.sendMessage(ctx.session, errorMsgJson);
+        }
+
         MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
 
         String username = usernames.get(ctx.session);
@@ -156,21 +165,25 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             if (game.isInCheckmate(otherTeamColor)) {
                 broadcastNotificationMessage(otherUser + " is in checkmate!", null);
+                gameOver = true;
             }
             else if (game.isInCheck(otherTeamColor)) {
                 broadcastNotificationMessage(otherUser + " is in check!", null);
             }
             else if (game.isInStalemate(otherTeamColor)) {
                 broadcastNotificationMessage(otherUser + " is in stalemate!", null);
+                gameOver = true;
             }
             else if (game.isInCheckmate(teamColor)) {
                 broadcastNotificationMessage(username + " is in checkmate!", null);
+                gameOver = true;
             }
             else if (game.isInCheck(teamColor)) {
                 broadcastNotificationMessage(username + " is in check!", null);
             }
             else if (game.isInStalemate(teamColor)) {
                 broadcastNotificationMessage(username + " is in stalemate!", null);
+                gameOver = true;
             }
 
 
@@ -179,9 +192,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String errorMsgJson = new Gson().toJson(errorMessage);
             connections.sendMessage(ctx.session, errorMsgJson);
         }
+    }
 
-        // LOAD GAME
-        // NOTIFICATION
+    private void leave(@NotNull WsMessageContext ctx) throws IOException {
+        String username = usernames.get(ctx.session);
+
+        UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+
+        sessionColors.remove(ctx.session);
+        gameIDs.remove(ctx.session);
+        usernames.remove(ctx.session);
+
+        connections.removeSessionFromGame(command.getGameID(), ctx.session);
+
+        try {
+            gameService.removePlayer(command);
+            broadcastNotificationMessage(username + " has left the game.", ctx.session);
+
+
+        } catch (Exception ex) {
+            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
+            String errorMsgJson = new Gson().toJson(errorMessage);
+            connections.sendMessage(ctx.session, errorMsgJson);
+        }
+
+        // STOP SENDING MESSAGES
     }
 
     private void broadcastNotificationMessage(String message, Session exclude) throws IOException {
@@ -203,18 +238,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return charStartCol + "" + startRow + " " + charEndCol + endRow;
     }
 
-    private void leave(@NotNull WsMessageContext ctx) throws IOException {
-        String username = usernames.get(ctx.session);
 
-        UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-
-        broadcastNotificationMessage(username + " has left the game.", ctx.session);
+    private void resign(@NotNull WsMessageContext ctx) {
 
 
-        // STOP SENDING MESSAGES
-    }
 
-    private void resign(Session session) {
+
+        gameOver = true;
         // NO MOVES CAN BE MADE
     }
 

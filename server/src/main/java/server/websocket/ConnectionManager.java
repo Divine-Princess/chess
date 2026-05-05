@@ -20,7 +20,10 @@ public class ConnectionManager {
     }
 
     public void removeSessionFromGame(int gameID, Session session) {
-
+        Set<Session> sessions = gameSessions.get(gameID);
+        if (sessions != null) {
+            sessions.remove(session);
+        }
     }
 
 //    public Set<Session> getSessionsForGame(int gameID) {
