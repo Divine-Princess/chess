@@ -21,30 +21,37 @@ public class GameplayUI implements GameHandler {
 
 
     public void render(ChessBoard board) {
-        int step;
-        int start;
-        int end;
-//        String whiteSquare;
-//        String blackSquare;
+        int rowStep;
+        int rowStart;
+        int rowEnd;
+        int colStep;
+        int colStart;
+        int colEnd;
 
         if (color == null || color.equalsIgnoreCase("WHITE")) {
             whiteSide();
-            step = 1;
-            start = 1;
-            end = 8;
+            rowStep = -1;
+            rowStart = 8;
+            rowEnd = 1;
+            colStep = 1;
+            colStart = 1;
+            colEnd = 8;
         }
         else {
             blackSide();
-            step = -1;
-            start = 8;
-            end = 1;
+            rowStep = 1;
+            rowStart = 1;
+            rowEnd = 8;
+            colStep = -1;
+            colStart = 8;
+            colEnd = 1;
 
         }
 
-        for (int i = start; i != end + step; i += step) {
+        for (int i = rowStart; i != rowEnd + rowStep; i += rowStep) {
             System.out.print(sideBg + sideText + " " +
-                    (9-i) + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
-            for (int j = start; j != end + step; j += step) {
+                    i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR);
+            for (int j = colStart; j != colEnd + colStep; j += colStep) {
                 ChessPosition pos = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(pos);
                 String symbol;
@@ -52,10 +59,10 @@ public class GameplayUI implements GameHandler {
                 String textColor = "";
 
                 if ((i + j) % 2 == 0) {
-                    bgColor = SET_BG_COLOR_LIGHT_GREY;
+                    bgColor = SET_BG_COLOR_BLACK;
                 }
                 else {
-                    bgColor = SET_BG_COLOR_BLACK;
+                    bgColor = SET_BG_COLOR_LIGHT_GREY;
                 }
 
                 if (piece == null) {
@@ -79,7 +86,7 @@ public class GameplayUI implements GameHandler {
                 System.out.print(bgColor + textColor + symbol + RESET_TEXT_COLOR + RESET_BG_COLOR);
             }
             System.out.print(sideBg + sideText + " " +
-                    (9-i) + " " + RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
+                    i + " " + RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
         }
         if (color == null || color.equalsIgnoreCase("WHITE")) { whiteSide();} else { blackSide(); }
     }

@@ -71,7 +71,6 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
 
     }
 
-
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
 

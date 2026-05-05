@@ -5,7 +5,6 @@ import org.eclipse.jetty.websocket.api.Session;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class ConnectionManager {
