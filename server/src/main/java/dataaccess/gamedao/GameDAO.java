@@ -3,8 +3,6 @@ package dataaccess.gamedao;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import model.data.GameData;
-
-import javax.xml.crypto.Data;
 import java.util.Collection;
 
 public interface GameDAO {

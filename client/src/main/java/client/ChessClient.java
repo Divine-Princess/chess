@@ -1,6 +1,5 @@
 package client;
 
-import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPosition;
 import client.websocket.GameHandler;
@@ -104,8 +103,6 @@ public class ChessClient {
                 case "resign" -> resign();
                 case "redraw" -> redraw();
                 case "quit" -> "quit";
-                // TODO! REMOVE AFTER TESTING!!!
-                case "clear" -> clear();
                 default -> help();
             };
         } catch (Exception ex) {
@@ -318,7 +315,7 @@ public class ChessClient {
             JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, playerColor, currentGameID);
             server.joinGame(joinGameRequest);
 
-            ws.connect(url, gameUI, authToken, currentGameID, playerColor, username);
+            ws.connect(url, gameUI, authToken, currentGameID, playerColor);
             state = State.INGAME;
 
             return "";
@@ -350,7 +347,7 @@ public class ChessClient {
             int gameID = games.get(gameNum);
 
             System.out.print("\n");
-            ws.connect(url, gameUI, authToken, gameID, playerColor, username);
+            ws.connect(url, gameUI, authToken, gameID, playerColor);
             state = State.INGAME;
 
             return "";
@@ -417,7 +414,6 @@ public class ChessClient {
 
     private String highlight(String[] space) {
         checkInGame();
-        // TODO: GET LEGAL MOVES, SEND TO UI. CHANGE COLOR
         if (!(space.length == 1)) {
             throw new RuntimeException(errorColor +
                     "Error: Incorrect format. Expected: highlight [COL/ROW] ex. highlight e3" + RESET_TEXT_COLOR);
@@ -492,8 +488,6 @@ public class ChessClient {
                 + inputColor +
                 "♢ quit " + mainColor + "🡒 Quit CHESS 240" + RESET_TEXT_COLOR;
     }
-
-    // TODO: REMOVE AFTER TESTING!!!
 
     private String clear() {
         try {

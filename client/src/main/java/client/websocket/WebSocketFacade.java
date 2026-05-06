@@ -20,7 +20,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler {
     GameHandler gameHandler;
 
     public void connect(String url, GameHandler gameHandler,
-                        String authToken, int gameID, String playerColor, String username) throws RuntimeException {
+                        String authToken, int gameID, String playerColor) throws RuntimeException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");

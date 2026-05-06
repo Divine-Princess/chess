@@ -1,7 +1,5 @@
 package websocket.messages;
 
-import chess.ChessGame;
-
 import java.util.Objects;
 
 /**
