@@ -1,7 +1,5 @@
 package client;
 
-import chess.ChessMove;
-import chess.ChessPosition;
 import client.websocket.GameHandler;
 import client.websocket.WebSocketFacade;
 import model.data.GameData;
@@ -18,26 +16,28 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
 
     private final ServerFacade server;
-    private State state = State.LOGGEDOUT;
+    protected State state = State.LOGGEDOUT;
     private final Scanner scanner = new Scanner(System.in);
-    private String authToken;
+    protected String authToken;
     private String username;
     private HashMap<Integer, Integer> games;
-    private final String errorColor = SET_TEXT_COLOR_YELLOW;
+    final String errorColor = SET_TEXT_COLOR_YELLOW;
     private final String mainColor = SET_TEXT_COLOR_MAGENTA;
     private final String inputColor = SET_TEXT_COLOR_BLUE;
-    private final WebSocketFacade ws = new WebSocketFacade();
-    private final String url;
-    private final GameHandler gameUI = new GameplayUI();
-    private int currentGameID;
+    final WebSocketFacade ws = new WebSocketFacade();
+    protected final String url;
+    protected final GameHandler gameUI = new GameplayUI();
+    protected int currentGameID;
     private String playerColor;
+    private final ChessGameClient gameClient;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
         this.url = url;
+        gameClient = new ChessGameClient(url);
     }
 
-    private enum State {
+    protected enum State {
         LOGGEDOUT,
         LOGGEDIN,
         INGAME
@@ -96,12 +96,11 @@ public class ChessClient {
                 case "join" -> joinGame(parameters);
                 case "observe" -> observeGame(parameters);
                 case "logout" -> logout();
-                case "move" -> move(parameters);
-                case "highlight" -> highlight(parameters);
-                case "hl" -> highlight(parameters);
-                case "leave" -> leave();
-                case "resign" -> resign();
-                case "redraw" -> redraw();
+                case "move" -> gameClient.move(parameters);
+                case "highlight", "hl" -> gameClient.highlight(parameters);
+                case "leave" -> gameClient.leave();
+                case "resign" -> gameClient.resign();
+                case "redraw" -> gameClient.redraw();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -385,68 +384,7 @@ public class ChessClient {
 
     }
 
-    private String move(String[] moves) {
-        checkInGame();
-        if (!(moves.length == 2)) {
-            throw new RuntimeException(errorColor +
-                    "Error: Incorrect format. Expected: move [START SPACE] [END SPACE] ex. move e3 e5"
-                    + RESET_TEXT_COLOR);
-        }
-
-        String start = moves[0];
-        String end = moves[1];
-
-        ChessPosition startPos = parsePosition(start);
-        ChessPosition endPos = parsePosition(end);
-
-        ChessMove move = new ChessMove(startPos, endPos, null);
-
-        ws.makeMove(move, authToken, currentGameID);
-
-        return "";
-    }
-
-    private ChessPosition parsePosition(String move) {
-        int col = move.charAt(0) - 'a' + 1;
-        int row = move.charAt(1) - '0';
-        return new ChessPosition(row, col);
-    }
-
-    private String highlight(String[] space) {
-        checkInGame();
-        if (!(space.length == 1)) {
-            throw new RuntimeException(errorColor +
-                    "Error: Incorrect format. Expected: highlight [COL/ROW] ex. highlight e3" + RESET_TEXT_COLOR);
-        }
-
-        gameUI.highlightMoves(parsePosition(space[0]));
-
-        return "";
-    }
-
-    private String leave() {
-        checkInGame();
-        ws.leave(authToken, currentGameID);
-        currentGameID = 0;
-        state = State.LOGGEDIN;
-        System.out.println(help());
-        return "";
-    }
-
-    private String resign() {
-        checkInGame();
-        ws.resign(authToken, currentGameID);
-        return "";
-    }
-
-    private String redraw() {
-        checkInGame();
-        gameUI.redraw();
-
-        return "";
-    }
-
-    private String help() {
+    protected String help() {
         if (state == State.LOGGEDOUT) {
             return SET_TEXT_BOLD + mainColor + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
                     + inputColor + RESET_TEXT_BOLD_FAINT +
@@ -503,7 +441,6 @@ public class ChessClient {
         }
     }
 
-
     private void checkLoggedIn() throws RuntimeException {
         if (state == State.LOGGEDOUT) {
             throw new RuntimeException(errorColor + "Error: Must be signed in to perform this action"
@@ -514,7 +451,7 @@ public class ChessClient {
         }
     }
 
-    private void checkInGame() throws RuntimeException {
+    void checkInGame() throws RuntimeException {
         if (state == State.LOGGEDOUT || state == State.LOGGEDIN) {
             throw new RuntimeException(errorColor + "Error: Must be in game to perform this action"
                     + RESET_TEXT_COLOR);

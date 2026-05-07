@@ -189,9 +189,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
 
         } catch (Exception ex) {
-            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
-            String errorMsgJson = new Gson().toJson(errorMessage);
-            connections.sendMessage(ctx.session, errorMsgJson);
+            sendErrorMessage(ex.getMessage(), ctx.session);
         }
     }
 
@@ -212,9 +210,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
 
         } catch (Exception ex) {
-            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
-            String errorMsgJson = new Gson().toJson(errorMessage);
-            connections.sendMessage(ctx.session, errorMsgJson);
+            sendErrorMessage(ex.getMessage(), ctx.session);
         }
     }
 
@@ -244,10 +240,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
 
         if (gameService.checkGameOver(command)) {
-            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
-                    "Game is over");
-            String errorMsgJson = new Gson().toJson(errorMessage);
-            connections.sendMessage(ctx.session, errorMsgJson);
+            sendErrorMessage("Game is over", ctx.session);
             return;
         }
 
@@ -258,13 +251,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             gameService.setGameOver(command);
 
         } catch (Exception ex) {
-            ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
-            String errorMsgJson = new Gson().toJson(errorMessage);
-            connections.sendMessage(ctx.session, errorMsgJson);
+            sendErrorMessage(ex.getMessage(), ctx.session);
         }
-
-        // NO MOVES CAN BE MADE
     }
 
+    private void sendErrorMessage(String message, Session session) throws IOException {
+        ServerMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
+        String errorMsgJson = new Gson().toJson(errorMessage);
+        connections.sendMessage(session, errorMsgJson);
+    }
 
 }
