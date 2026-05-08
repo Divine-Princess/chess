@@ -114,7 +114,7 @@ public class PieceMoveCalculator {
             getNextPosition();
 
             if (!(0 < nextRow && nextRow <= 8 && 0 < nextCol && nextCol <= 8)) {
-                break;
+                continue;
             }
             getOtherPiece();
 
