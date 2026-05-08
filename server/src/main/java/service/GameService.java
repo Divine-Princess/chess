@@ -1,8 +1,6 @@
 package service;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.InvalidMoveException;
+import chess.*;
 import dataaccess.DataAccessException;
 import dataaccess.authdao.AuthDAO;
 import dataaccess.gamedao.GameDAO;
@@ -177,6 +175,28 @@ public class GameService {
 
         ChessMove move = command.getMove();
 
+        ChessBoard board = chessGame.getBoard();
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (piece == null) {
+            throw new InvalidMoveException("Invalid move");
+        }
+        if (!color.equalsIgnoreCase(chessGame.getTeamTurn().name())) {
+            throw new InvalidMoveException("Cannot move opponent's piece");
+        }
+
+        ChessPosition endPosition = move.getEndPosition();
+        if (move.getPromotionPiece() != null) {
+            if (!(piece.getPieceType() == ChessPiece.PieceType.PAWN)) {
+                throw new InvalidMoveException("This piece cannot promote");
+            } else if (endPosition.getRow() != 8 && endPosition.getRow() != 1) {
+                throw new InvalidMoveException(move.getPromotionPiece() + "Pawn cannot promote here");
+            }
+        }
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN &&
+                (endPosition.getRow() == 8 || endPosition.getRow() == 1)
+                && move.getPromotionPiece() == null) {
+            throw new InvalidMoveException("Pawn must promote");
+        }
         chessGame.makeMove(move);
         return chessGame;
     }
@@ -184,7 +204,12 @@ public class GameService {
 
     public void removePlayer(UserGameCommand command) throws DataAccessException {
 
-        GameData game = getGame(command);
+        GameData game;
+        try {
+            game = getGame(command);
+        } catch (Exception ex) {
+            return;
+        }
 
         String currentUser = authDAO.getAuth(command.getAuthToken()).username();
 

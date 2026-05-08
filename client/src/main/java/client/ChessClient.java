@@ -16,31 +16,63 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
 
     private final ServerFacade server;
-    protected State state = State.LOGGEDOUT;
+    private State state = State.LOGGEDOUT;
     private final Scanner scanner = new Scanner(System.in);
-    protected String authToken;
+    private String authToken;
     private String username;
     private HashMap<Integer, Integer> games;
     final String errorColor = SET_TEXT_COLOR_YELLOW;
     private final String mainColor = SET_TEXT_COLOR_MAGENTA;
     private final String inputColor = SET_TEXT_COLOR_BLUE;
     final WebSocketFacade ws = new WebSocketFacade();
-    protected final String url;
-    protected final GameHandler gameUI = new GameplayUI();
-    protected int currentGameID;
+    private final String url;
+    private final GameHandler gameUI = new GameplayUI();
+    private int currentGameID;
     private String playerColor;
     private final ChessGameClient gameClient;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
         this.url = url;
-        gameClient = new ChessGameClient(url);
+        gameClient = new ChessGameClient(this);
     }
 
-    protected enum State {
+    public enum State {
         LOGGEDOUT,
         LOGGEDIN,
         INGAME
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public String getAuth() {
+        return authToken;
+    }
+
+    public WebSocketFacade getWs() {
+        return ws;
+    }
+
+    public GameHandler getUi() {
+        return gameUI;
+    }
+
+    public int getCurrentGameID() {
+        return currentGameID;
+    }
+
+    public void setCurrentGameID(int gameID) {
+        this.currentGameID = gameID;
+    }
+
+    public Scanner getScanner() {
+        return scanner;
     }
 
     public void run() {
@@ -188,7 +220,7 @@ public class ChessClient {
             else if (cred.length < 2){
                 System.out.println(SET_TEXT_BOLD + errorColor + "Missing username or password."
                         + mainColor + RESET_TEXT_BOLD_FAINT + "\nExpected:" + SET_TEXT_BOLD
-                        + inputColor + " USERNAME PASSWORD EMAIL" + RESET_TEXT_BOLD_FAINT
+                        + inputColor + " USERNAME PASSWORD" + RESET_TEXT_BOLD_FAINT
                         + RESET_TEXT_COLOR);
                 System.out.println(mainColor + "Enter " +  inputColor +
                         "return" + mainColor + " to go back" + RESET_TEXT_COLOR);
@@ -336,24 +368,28 @@ public class ChessClient {
             throw new RuntimeException(errorColor +
                     "Error: Please list games before attempting to observe." + RESET_TEXT_COLOR);
         }
+
+        int gameNum;
+
         try {
-            int gameNum = Integer.parseInt(num[0]);
-
-            if (!(games.containsKey(gameNum))) {
-                throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
-            }
-
-            int gameID = games.get(gameNum);
-
-            System.out.print("\n");
-            ws.connect(url, gameUI, authToken, gameID, playerColor);
-            state = State.INGAME;
-
-            return "";
+            gameNum = Integer.parseInt(num[0]);
 
         } catch (Exception ex) {
             throw new RuntimeException(errorColor + "Error: '" + num[0] + "' " + "not a number" + RESET_TEXT_COLOR);
         }
+
+        if (!(games.containsKey(gameNum))) {
+            throw new RuntimeException(errorColor + "Error: Game does not exist" + RESET_TEXT_COLOR);
+        }
+
+        currentGameID = games.get(gameNum);
+
+        System.out.print("\n");
+        ws.connect(url, gameUI, authToken, currentGameID, playerColor);
+        state = State.INGAME;
+
+        return "";
+
     }
 
     private String logout() {
@@ -384,7 +420,7 @@ public class ChessClient {
 
     }
 
-    protected String help() {
+    String help() {
         if (state == State.LOGGEDOUT) {
             return SET_TEXT_BOLD + mainColor + " \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
                     + inputColor + RESET_TEXT_BOLD_FAINT +
@@ -398,7 +434,8 @@ public class ChessClient {
             return SET_TEXT_BOLD + mainColor + "  \uD83D\uDF9B COMMANDS: \uD83D\uDF9B\n"
                     + inputColor + RESET_TEXT_BOLD_FAINT +
                     "♢ move [COL/ROW] [COL/ROW] " + mainColor + "🡒 Move chess piece using valid moves. " +
-                    "Ex. move b3 f7 \n"
+                    "Ex. move b3 f7 \n" +
+                    "OR if promoting:\n move f7 f8 knight"
                     + inputColor +
                     "♢ highlight (or hl) [COL/ROW] " + mainColor + "🡒 Highlight legal moves of single chess piece\n"
                     + inputColor +
@@ -453,7 +490,7 @@ public class ChessClient {
 
     void checkInGame() throws RuntimeException {
         if (state == State.LOGGEDOUT || state == State.LOGGEDIN) {
-            throw new RuntimeException(errorColor + "Error: Must be in game to perform this action"
+            throw new RuntimeException(errorColor + "Error: Must be in game to perform this action\n"
                     + RESET_TEXT_COLOR);
         }
     }

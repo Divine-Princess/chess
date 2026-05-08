@@ -11,6 +11,7 @@ public class ClientMain {
         try {
             new ChessClient(url).run();
 
+
         } catch (Throwable ex) {
             throw new RuntimeException();
         }

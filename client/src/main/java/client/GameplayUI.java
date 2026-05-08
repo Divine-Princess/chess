@@ -130,6 +130,10 @@ public class GameplayUI implements GameHandler {
 
         Collection<ChessMove> legalMoves = currentGame.validMoves(position);
 
+        if (legalMoves == null) {
+            throw new RuntimeException("There are no pieces in that space.\n");
+        }
+
         List<ChessPosition> endPos = new ArrayList<>();
 
         for (ChessMove move : legalMoves) {
